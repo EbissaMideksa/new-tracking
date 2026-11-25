@@ -1,0 +1,150 @@
+name: Deploy
+
+# CI builds and publishes the artifact to GHCR; this workflow makes the host
+# pull that exact immutable image and roll it out blue/green.
+#
+# Fires once, after CI finishes successfully — never on the raw push, which
+# would race CI and could deploy before the image exists.
+#
+# Requires a self-hosted runner registered on the target machine (the WSL box).
+# Register it with the label `wsl` so it matches `runs-on` below.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main, master]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Short SHA to deploy (defaults to the last successful CI run)"
+        required: false
+        type: string
+
+concurrency:
+  # Never let two deploys race on the same blue/green pair.
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Pull artifact and deploy
+    # Never deploy a build that did not pass. workflow_run fires on both
+    # success and failure, so gate on the conclusion.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    # This is the only deploy path — there is no manual `make deploy`. The job
+    # runs on a self-hosted runner registered on the WSL2 box.
+    # Override the labels with the repository variable DEPLOY_RUNNER_LABELS if
+    # your runner uses different labels, e.g.
+    #   ["self-hosted","linux","x64","tracking-deploy"]
+    runs-on: >-
+      ${{ fromJSON(vars.DEPLOY_RUNNER_LABELS
+                   || '["self-hosted","linux","x64","wsl"]') }}
+    # NOTE: timeout-minutes only starts counting once the job is picked up by a
+    # runner. A job waiting for a runner is NOT subject to it, so if no runner
+    # matches these labels this job waits indefinitely — and, because the
+    # concurrency group above has cancel-in-progress: false, every later deploy
+    # queues behind it. If deploys stop appearing as "in progress", check that a
+    # runner is online first: Settings -> Actions -> Runners.
+    timeout-minutes: 20
+
+    # Job-level so every step sees the registry credentials. The
+    # scripts/registry-login.sh helper (sourced by pull-image.sh and deploy.sh)
+    # reads these from the environment, so the automated and manual paths
+    # authenticate identically.
+    env:
+      GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      # Absolute path to the live checkout on this host. The runner's own
+      # _work/ directory is NOT the live stack: .env.docker.cloud, nginx/ssl
+      # and .deploy/ are gitignored and exist only in the real checkout.
+      STACK_DIR: ${{ vars.STACK_DIR }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve target SHA
+        id: sha
+        run: |
+          # A manual run may pin an explicit SHA; otherwise use the commit that
+          # the completed CI run was built from. For workflow_run, GITHUB_SHA is
+          # the default-branch head, so head_sha is the correct source.
+          short="${{ inputs.sha }}"
+          if [ -z "$short" ]; then
+            short="${{ github.event.workflow_run.head_sha || github.sha }}"
+          fi
+          short="${short:0:7}"
+          echo "sha=$short" >> "$GITHUB_OUTPUT"
+          echo "Deploying release $short"
+
+      - name: Preflight
+        run: |
+          set -euo pipefail
+          command -v docker >/dev/null || { echo "::error::docker not found"; exit 1; }
+
+          if [ -z "${STACK_DIR:-}" ]; then
+            echo "::error::STACK_DIR repository variable is not set."
+            echo "::error::Set it to the live checkout path, e.g. /home/$(whoami)/tracking"
+            exit 1
+          fi
+          [ -d "$STACK_DIR" ] || { echo "::error::STACK_DIR '$STACK_DIR' does not exist"; exit 1; }
+          [ -f "$STACK_DIR/.env.docker.cloud" ] || { echo "::error::$STACK_DIR/.env.docker.cloud missing"; exit 1; }
+          [ -d "$STACK_DIR/nginx/ssl" ] || { echo "::error::$STACK_DIR/nginx/ssl missing — TLS material lives here"; exit 1; }
+
+          if [ -z "${GHCR_TOKEN:-}" ]; then
+            echo "::warning title=No registry token::GHCR_TOKEN secret is empty; the packages must be public to pull."
+          else
+            echo "GHCR token present."
+          fi
+
+          echo "STACK_DIR  : $STACK_DIR"
+          echo "live release: $(cat "$STACK_DIR/.deploy/last-sha" 2>/dev/null || echo none)"
+          echo "active slot : app-$(cat "$STACK_DIR/.deploy/active" 2>/dev/null || echo unknown)"
+
+      - name: Sync the live checkout to the release commit
+        env:
+          TARGET_SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          set -euo pipefail
+          cd "$STACK_DIR"
+
+          # Refuse to silently stash or discard work in progress on the host.
+          if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+            echo "::error::The live checkout has uncommitted changes:"
+            git --no-pager status --short --untracked-files=no
+            echo "::error::Commit or discard them before deploying."
+            exit 1
+          fi
+
+          git fetch --quiet origin
+          git checkout --quiet --detach "$TARGET_SHA"
+          echo "live checkout now at $(git rev-parse --short HEAD)"
+
+      - name: Pull the published artifact from GHCR
+        run: ./scripts/pull-image.sh ${{ steps.sha.outputs.sha }}
+
+      - name: Deploy (blue/green, migrations, healthcheck)
+        env:
+          IMAGE_TAG: ${{ steps.sha.outputs.sha }}
+        run: ./scripts/deploy.sh
+
+      - name: Verify health
+        # Pin to the live stack for consistency with every other step. `health`
+        # only curls the endpoint today, but pinning here keeps it correct if it
+        # ever needs .env.docker.cloud — gitignored, so absent from _work/.
+        # Preflight above has already guaranteed STACK_DIR is set and exists.
+        working-directory: ${{ vars.STACK_DIR }}
+        run: make health
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Deploy"
+            echo ""
+            echo "- commit:  \`${{ github.sha }}\`"
+            echo "- release: \`${{ steps.sha.outputs.sha }}\`"
+            echo "- status:  ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"

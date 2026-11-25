@@ -1,0 +1,644 @@
+/* Organization structure — Tailwind (@apply) module */
+@reference "../../app/globals.css";
+:root {
+  --teal-900: #17403f;
+  --teal-700: #0f6b69;
+  --teal-600: #0d7a77;
+  --teal-200: #b9d9d2;
+  --teal-100: #dcefea;
+  --teal-50: #eef7f4;
+  --ink: #1b2b2a;
+  --muted: #6a7a79;
+  --line: #dde4e3;
+  --func: #9fb0ae;
+  --soft: #f3f6f5;
+  --card: #fff;
+  --warn-bg: #fff4e0;
+  --warn-ink: #8a5a00;
+  --danger: #b42318;
+}
+.root { @apply text-[13px] leading-[1.4] max-w-[1280px] mx-auto px-1 pt-2 pb-8 text-[var(--ink)]; }
+.root *, .root *::before, .root *::after { box-sizing: border-box; }
+.root h1, .root h3, .root h4, .root p, .root ul { @apply m-0 p-0; }
+.root ul { list-style: none; }
+.root :where(a) { color: inherit; text-decoration: none; }
+.root svg { flex: none; }
+
+/* ── page chrome ─────────────────────────────────────────── */
+.crumbs { @apply text-xs mb-3.5 text-[var(--muted)]; }
+.crumbs span { @apply mx-1; }
+.crumbs b { @apply text-[var(--ink)] font-medium; }
+.pageHead { @apply flex justify-between items-start gap-4 flex-wrap mb-[18px]; }
+.h1 { @apply text-[26px] leading-[1.2] font-semibold tracking-[-0.01em]; }
+.sub { @apply text-[13px] mt-1.5 text-[var(--muted)]; }
+.headBtns { @apply flex gap-2 items-center flex-wrap; }
+.toolbar { @apply flex justify-between items-center gap-3 flex-wrap mb-3.5; }
+
+.btn, .btnPrimary {
+  @apply inline-flex items-center gap-[7px] h-9 px-3.5 rounded-lg border bg-[var(--card)] text-[var(--ink)] font-medium cursor-pointer whitespace-nowrap transition-colors;
+}
+.btn:hover { @apply bg-[var(--soft)] border-[#c9d3d1]; }
+.btnPrimary { @apply bg-[var(--teal-700)] border-[var(--teal-700)] text-white; }
+.btnPrimary:hover:not(:disabled) { @apply bg-[var(--teal-900)]; }
+.btnPrimary:disabled { @apply opacity-[.45] cursor-not-allowed; }
+
+.badge, .badgeTeal { @apply inline-flex items-center gap-[5px] h-[22px] px-[9px] rounded-md text-[11px] font-medium bg-[var(--soft)] text-[#44625f] border border-[var(--line)]; }
+.badgeTeal { @apply bg-[var(--teal-100)] text-[var(--teal-700)] border-transparent; }
+.muted { @apply text-xs text-[var(--muted)]; }
+.empty { @apply p-6 text-center text-[var(--muted)]; }
+
+.tabs { @apply inline-flex p-[3px] gap-0.5 bg-[var(--soft)] border border-[var(--line)] rounded-[10px]; }
+.tab { @apply border-0 bg-transparent px-3.5 py-[7px] rounded-lg font-medium text-[var(--muted)] cursor-pointer; }
+.tabActive { @apply bg-[var(--teal-100)] text-[var(--teal-700)]; }
+
+.legend, .legendStack { @apply flex gap-5 text-xs items-center flex-wrap text-[var(--muted)]; }
+.legend span, .legendStack span { @apply inline-flex items-center gap-2; }
+.legSolid, .legDash, .legDot { @apply inline-block w-[30px] h-0 border-t-[1.5px] border-[var(--func)]; }
+.legDash { @apply border-t-[1.5px] border-dashed border-[var(--teal-600)]; }
+.legDot { @apply border-t-[1.5px] border-dotted border-[var(--teal-600)]; }
+
+.card { @apply bg-[var(--card)] border border-[var(--line)] rounded-[14px] px-[18px] pt-4 pb-[18px] mb-3.5; }
+.cardHead { @apply flex justify-between items-center gap-3 flex-wrap pb-3.5 mb-3.5 border-b border-[var(--line)]; }
+.cardTitle { @apply flex items-center gap-2 text-sm font-semibold text-[#26403e]; }
+.cardTitle svg { @apply text-[var(--teal-700)]; }
+
+.popWrap { @apply relative inline-block; }
+.popPanel { @apply absolute top-[calc(100%+6px)] z-30 min-w-[200px] bg-white border border-[var(--line)] rounded-[10px] shadow-[0_8px_24px_rgba(20,50,48,.14)] p-1.5 flex flex-col gap-0.5; }
+.popRight { @apply right-0; }
+.popLeft { @apply left-0; }
+
+/* ── org page layout ─────────────────────────────────────── */
+.orgRoot { @apply flex min-h-screen overflow-hidden bg-[#f8fafc]; }
+.orgSidebarWrap { @apply shrink-0; }
+.orgSidebar {
+  @apply sticky top-0 h-screen overflow-y-auto border-r border-[var(--line)] bg-[var(--card)] z-10 w-[240px] transition-[width] duration-200;
+}
+.orgSidebarCollapsed { @apply w-[72px]; }
+.orgSidebarHeader { @apply flex justify-between items-center px-4 py-3.5 border-b border-[var(--line)]; }
+.orgSidebarBrand { @apply flex items-center gap-2; }
+.orgSidebarBrandText { @apply font-semibold text-base; }
+.orgSidebarBrandCollapsed { @apply hidden; }
+.orgSidebarToggle { @apply w-8 h-8 border-0 rounded-md bg-transparent text-[var(--muted)] cursor-pointer grid place-items-center; }
+.orgSidebarToggle:hover { @apply bg-[var(--soft)] text-[var(--ink)]; }
+.orgSidebarNav { @apply px-3 py-4; }
+.orgSidebarList { @apply flex flex-col gap-0.5; }
+.orgSidebarItem {
+  @apply flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-[var(--muted)] border border-transparent whitespace-nowrap;
+}
+.orgSidebarItem:hover { @apply bg-[var(--soft)] text-[var(--ink)] border-[var(--line)]; }
+.orgSidebarItemActive { @apply bg-[var(--teal-50)] text-[var(--teal-700)] border-[var(--teal-200)]; }
+.orgSidebarItem svg { @apply shrink-0 w-[18px] h-[18px]; }
+.orgSidebarItemLabel { @apply flex-1 min-w-0; }
+.orgSidebarItemIconOnly { @apply w-5 text-center opacity-0 transition-opacity; }
+.orgSidebarCollapsed .orgSidebarItemIconOnly { @apply opacity-100; }
+.orgSidebarCollapsed .orgSidebarItemLabel { @apply opacity-0; }
+.orgSidebarFooter { @apply px-4 py-3 border-t border-[var(--line)] text-[11px] text-[var(--muted)]; }
+.orgMain { @apply flex-1 min-w-0 flex flex-col; }
+
+.orgTopbar {
+  @apply sticky top-0 flex justify-between items-center px-6 py-3.5 gap-4 border-b border-[var(--line)] bg-white z-20;
+}
+.orgTopbarLeft { @apply flex items-center gap-2 flex-1; }
+.orgTopbarTitle { @apply text-lg font-semibold; }
+.orgTopbarRight { @apply flex items-center gap-3 shrink-0; }
+.orgTopbarStatus { @apply text-xs; }
+.orgMainContent { @apply flex-1 p-6 overflow-y-auto min-h-0; }
+
+/* ── tree visualization ────────────────────────────────────── */
+.orgTree { @apply relative py-2; }
+.orgTreeRoot { @apply flex justify-center mb-3.5; }
+.orgTreeNode {
+  @apply flex items-center gap-2.5 px-4 py-2.5 rounded-[10px] border-2 border-[var(--teal-600)] bg-white shadow-[0_2px_8px_rgba(13,122,119,0.15)];
+}
+.orgTreeNode svg { @apply shrink-0; }
+.orgTreeLineV { @apply relative w-[26px] h-full border-l border-[var(--line)] ml-3; }
+.orgTreeDivision { @apply relative mt-1 mb-0.5 ml-[26px]; }
+.divisionHeader {
+  @apply flex items-center gap-2 px-3.5 py-2 cursor-pointer rounded-lg border border-[var(--line)] bg-[var(--card)] transition-all;
+}
+.divisionHeader:hover { @apply border-[var(--teal-600)] bg-[var(--teal-50)]; }
+.divisionHeaderExpanded { @apply border-[var(--teal-600)] bg-[var(--teal-50)] shadow-[0_0_0_1px_var(--teal-600)]; }
+.divisionToggle { @apply shrink-0 w-4 h-4 grid place-items-center text-[11px] text-[var(--muted)] font-bold; }
+.divisionToggleOpen { @apply text-[var(--teal-700)]; }
+.divisionName { @apply font-semibold text-sm flex-1; }
+.divisionCode { @apply text-[11px] text-[var(--muted)] bg-[var(--soft)] px-2 py-0.5 rounded ml-auto; }
+.divisionBody { @apply pl-5 border-l border-[var(--line)] ml-3; }
+.divisionBodyLast { @apply border-l-transparent; }
+
+.orgTreeDept { @apply relative mt-1 mb-0.5 ml-[26px]; }
+.deptHeader {
+  @apply flex items-center gap-2 px-3.5 py-2 cursor-pointer rounded-lg border border-[var(--line)] bg-[var(--card)] transition-all;
+}
+.deptHeader:hover { @apply border-[#c9d3d1] bg-[var(--soft)]; }
+.deptHeaderExpanded { @apply border-[var(--teal-600)] bg-[var(--teal-50)] shadow-[0_0_0_1px_var(--teal-600)]; }
+.deptToggle { @apply shrink-0 w-4 h-4 grid place-items-center text-[11px] text-[var(--muted)] font-bold; }
+.deptToggleOpen { @apply text-[var(--teal-700)]; }
+.deptName { @apply font-medium text-[13px] flex-1; }
+.deptUnits { @apply text-[11px] text-[var(--muted)] ml-auto; }
+.deptBody { @apply pl-5 border-l border-[var(--line)] ml-3; }
+.deptBodyLast { @apply border-l-transparent; }
+
+.orgTreeUnit { @apply relative my-[3px] pl-3; }
+.orgTreeUnitLast { @apply pl-3; }
+.unitLink {
+  @apply flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[13px] text-[var(--ink)] border border-transparent;
+}
+.unitLink:hover { @apply bg-[var(--soft)] text-[var(--teal-700)] border-[var(--line)] underline; }
+.unitLinkHot { @apply border-[var(--teal-600)] bg-white; }
+.unitZone { @apply text-[11px] text-[var(--muted)] ml-1.5; }
+.orgTreeDotted { @apply text-[#94a3b8] text-sm mx-2 tracking-[-1px] font-mono; }
+
+/* ── workforce panel ───────────────────────────────────────── */
+.workforcePanel { @apply w-[340px] shrink-0 border-l border-[var(--line)] bg-[var(--card)] flex flex-col; }
+.panelHead { @apply px-5 py-4 border-b border-[var(--line)]; }
+.panelTitle { @apply text-base font-semibold mb-1; }
+.panelSub { @apply text-xs text-[var(--muted)]; }
+
+.wfCols { @apply flex gap-3.5 px-5 py-4 overflow-x-auto; }
+.wfCol { @apply border border-[var(--line)] rounded-[10px] bg-[var(--soft)] min-w-[200px] flex flex-col; }
+.wfCorp { @apply border-[var(--teal-600)] bg-[var(--teal-50)]; }
+.wfGeo { @apply border-[#c9d3d1]; }
+.wfColHead { @apply flex items-center justify-between px-3.5 py-2.5 border-b border-[var(--line)] rounded-t-lg bg-white; }
+.wfCol ul { @apply m-0 px-3.5 py-3 flex-1 overflow-y-auto; }
+.wfCol li { @apply mb-2; }
+.wfUnit { @apply flex items-center justify-between px-2.5 py-1.5 rounded-md text-[13px] text-[var(--ink)] cursor-pointer transition-colors; }
+.wfUnit:hover { @apply bg-[var(--card)] text-[var(--teal-700)] underline; }
+.wfUnitHot { @apply border border-[var(--teal-600)] bg-white; }
+.wfUnitMissing { @apply text-xs text-[var(--muted)] px-2.5 py-1.5; }
+.wfFoot { @apply px-3.5 py-2 text-[11px] text-[var(--muted)] border-t border-[var(--line)]; }
+.wfLegend { @apply px-5 py-2.5 text-xs text-[var(--muted)] border-t border-[var(--line)] flex items-center gap-2; }
+
+@media (max-width: 900px) {
+  .orgSidebarCollapsed { @apply w-0 overflow-hidden border-0; }
+  .orgSidebarCollapsed .orgSidebarToggle { @apply hidden; }
+  .orgMainContent { @apply p-4; }
+}
+
+/* ── tree container ───────────────────────────────────────────── */
+.treeWrap { @apply relative mt-2; }
+.tree { @apply flex flex-col gap-2.5 py-2; }
+
+/* ── CreateUnitForm specific classes ────────────────────────── */
+.sectionLabel { @apply text-[10px] font-semibold tracking-[0.08em] uppercase text-[var(--muted)] mb-1.5; }
+.formLabel { @apply block text-xs font-medium text-[var(--ink)] mb-1; }
+.field { @apply mb-3; }
+.select, .input {
+  @apply w-full h-9 px-3 rounded-lg border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] text-[13px];
+}
+.select:focus, .input:focus { @apply outline-2 outline-[var(--teal-600)] border-[var(--teal-600)]; }
+.help { @apply text-[11px] text-[var(--muted)] mt-1; }
+.formError { @apply bg-[#fef3e0] border border-[#f5d5a3] text-[#8a5a00] px-3.5 py-2.5 rounded-lg mb-3.5 text-xs; }
+.formFoot { @apply flex justify-between items-center mt-4 pt-4 border-t border-[var(--line)]; }
+.pageFoot { @apply flex justify-between items-center mt-6 pt-4 border-t border-[var(--line)] text-xs text-[var(--muted)] gap-4; }
+
+/* ── Reporting preview chain ────────────────────────────────── */
+.chain { @apply flex items-center gap-2.5 my-2.5 flex-wrap; }
+.chainBox { @apply flex flex-col gap-1 px-3.5 py-2.5 rounded-[10px] border border-[var(--line)] bg-[var(--card)]; }
+.chainBox:hover { @apply border-[#c9d3d1]; }
+.chainEmpty { @apply opacity-[.55] border-dashed bg-[var(--soft)]; }
+.chainTeal { @apply border-[var(--teal-600)] bg-[var(--teal-50)] shadow-[0_0_0_1px_var(--teal-600)]; }
+.chainRow { @apply flex items-center gap-2.5 my-3 flex-wrap; }
+
+.noteCard { @apply flex items-start gap-2.5 bg-[var(--teal-50)] border border-[var(--teal-200)] rounded-[10px] px-4 py-3 mt-3.5; }
+.noteCard svg { @apply text-[var(--teal-700)] shrink-0; }
+.previewFoot { @apply mt-2.5 text-[11.5px] text-[var(--muted)]; }
+
+/* ── dept tree in form ──────────────────────────────────────── */
+.deptTree { @apply mt-2.5; }
+.divTreeHead { @apply flex items-center gap-2 px-3 py-2 cursor-pointer rounded-lg border border-[var(--line)] bg-[var(--card)] transition-all; }
+.divTreeHead:hover { @apply border-[var(--teal-600)] bg-[var(--teal-50)]; }
+.divTreeBody { @apply pl-5 border-l border-[var(--line)] ml-3; }
+.unitRow { @apply flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[13px] text-[var(--ink)]; }
+.unitRow:hover { @apply bg-[var(--soft)]; }
+
+/* ── zone/category pickers ──────────────────────────────────── */
+.zonePick, .catePick { @apply flex flex-col gap-1.5; }
+
+/* ── additional CreateUnitForm classes ──────────────────────── */
+.banner { @apply flex items-center gap-2.5 bg-[#fff3e0] border border-[#f5d5a3] rounded-lg px-3.5 py-2.5 text-xs text-[#8a5a00] mb-3.5; }
+.bannerWarn { @apply bg-[#fef3e0] border-[#f5d5a3] text-[#8a5a00]; }
+.createGrid { @apply grid grid-cols-2 gap-4 mt-3; }
+.dash { @apply border-t border-dashed border-[var(--line)] my-2; }
+.inheritBox { @apply flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--line)] bg-[var(--card)]; }
+.lockedInput { @apply w-full h-9 px-3 rounded-lg border border-[var(--line)] bg-[var(--soft)] text-[var(--muted)] text-[13px]; }
+.noteInset { @apply px-3.5 py-2.5 rounded-lg bg-[var(--soft)] text-[var(--muted)] text-xs; }
+.ok { @apply text-[var(--teal-700)] font-medium; }
+.pageHead { @apply flex justify-between items-start gap-4 flex-wrap mb-[18px]; }
+
+/* ── refresh controls ─────────────────────────────────────────── */
+.refreshGroup { @apply flex items-center gap-2; }
+.loadingText { @apply text-[11px] text-[var(--muted)]; }
+.errorText { @apply text-[11px] text-[var(--danger)]; }
+.btnRefresh { @apply inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] font-medium text-[13px] cursor-pointer; }
+.btnRefresh:hover { @apply bg-[var(--soft)] border-[#c9d3d1]; }
+.btnRefresh:disabled { @apply opacity-50 cursor-not-allowed; }
+.btnDisabled { @apply opacity-50 cursor-not-allowed; }
+.refreshIcon { @apply text-xs; }
+
+/* ═══════════════════════════════════════════════════════════════
+   Design-matched screens (design.pdf): shell, overview,
+   geography view, dialogs, create-unit columns.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── app shell: org sidebar + global bar + page column ───────── */
+.shell { @apply flex h-full min-h-0 bg-[#f6f8f9] text-[13px] text-[var(--ink)]; }
+.shell *, .shell *::before, .shell *::after { box-sizing: border-box; }
+.shell h1, .shell h2, .shell h3, .shell h4, .shell p, .shell ul { @apply m-0 p-0; }
+.shell ul { list-style: none; }
+.shell :where(a) { color: inherit; text-decoration: none; }
+.shell svg { flex: none; }
+
+.side { @apply shrink-0 w-[218px] bg-white border-r border-[var(--line)] flex flex-col; }
+.sideTop { @apply px-3 pt-3 pb-1.5; }
+.sideSwitch { @apply flex items-center gap-2 w-full h-10 px-[11px] border border-[var(--line)] rounded-[9px] bg-white font-semibold text-[13.5px] text-[var(--ink)] cursor-pointer; }
+.sideSwitch:hover { @apply bg-[var(--soft)]; }
+.sideSwitch svg { @apply text-[var(--teal-700)]; }
+.sideSwitchName { @apply flex-1 text-left; }
+.sideSwitchChev { @apply text-[var(--muted)]; }
+.sideSection { @apply px-5 pt-4 pb-1.5 text-[10.5px] font-bold tracking-[0.09em] uppercase text-[#93a3a2]; }
+.sideNav { @apply flex-1; }
+.sideItem { @apply flex items-center gap-2.5 mx-2 my-px px-[11px] py-2 rounded-lg border border-transparent text-[13px] font-medium text-[#465c5a] cursor-pointer; }
+.sideItem:hover { @apply bg-[var(--soft)] text-[var(--ink)]; }
+.sideItemActive { @apply bg-[#e8f3f0] text-[#0d6b64] border-[#cfe6de] font-semibold; }
+.sideItemActive svg, .sideItemActive .sideItemIcon { @apply text-[#0d6b64]; }
+.sideItem svg, .sideItemIcon { @apply text-[#7d918f]; }
+.sideFootCard { @apply mx-3 my-3 px-[13px] py-3 border border-[var(--line)] rounded-[10px] bg-[#fbfdfc]; }
+.sideFootCard svg { @apply text-[var(--teal-700)] mb-1.5; }
+.sideFootCard h4 { @apply text-[12.5px] font-semibold mb-1; }
+.sideFootCard p { @apply text-[11px] text-[var(--muted)] leading-[1.45]; }
+
+.pageCol { @apply flex-1 min-w-0 flex flex-col overflow-hidden; }
+.topBar { @apply shrink-0 flex items-center gap-2.5 px-[22px] py-2.5 bg-white border-b border-[var(--line)] z-30; }
+.brandMark { @apply w-[30px] h-[30px] rounded-lg bg-[#123f3c] text-[#eafffb] grid place-items-center; }
+.brandName { @apply font-bold text-[15.5px] tracking-[-0.01em]; }
+.brandDivider { @apply w-px h-5 bg-[var(--line)] mx-1; }
+.brandSub { @apply text-[13px] text-[var(--muted)]; }
+.topBarRight { @apply ml-auto flex items-center gap-2.5; }
+.chipPriv { @apply inline-flex items-center gap-1.5 h-7 px-[11px] rounded-lg bg-[#e8f3f0] border border-[#cfe6de] text-[#0d6b64] text-xs font-semibold; }
+.roundBtn { @apply w-[30px] h-[30px] rounded-full border border-[var(--line)] bg-white text-[var(--muted)] grid place-items-center cursor-pointer; }
+.roundBtn:hover { @apply bg-[var(--soft)] text-[var(--ink)]; }
+.avatarCircle { @apply w-8 h-8 rounded-full bg-[#dfe9e7] text-[#33524f] grid place-items-center border border-[#cfdeda]; }
+.pageScroll { @apply flex-1 overflow-y-auto min-h-0; }
+.pageBody { @apply px-[26px] pt-5 pb-[34px] max-w-[1560px] mx-auto w-full; }
+
+/* ── overview page chrome ─────────────────────────────────────── */
+.crumbRow { @apply text-[12.5px] text-[var(--muted)] mb-2; }
+.crumbRow b { @apply text-[var(--ink)] font-semibold; }
+.crumbRow i { @apply mx-1.5 not-italic; }
+.headRow { @apply flex justify-between items-start gap-4 flex-wrap mb-4; }
+.h1Big { @apply text-[27px] font-semibold tracking-[-0.015em] leading-[1.15]; }
+.subLine { @apply text-[13.5px] text-[var(--muted)] mt-1.5; }
+.headActions { @apply flex gap-2.5 flex-wrap; }
+.btnGhost { @apply inline-flex items-center gap-[7px] h-[38px] px-[15px] rounded-[9px] border border-[var(--line)] bg-white text-[var(--ink)] font-medium cursor-pointer whitespace-nowrap; }
+.btnGhost:hover { @apply bg-[var(--soft)] border-[#c9d3d1]; }
+.btnTeal { @apply inline-flex items-center gap-[7px] h-[38px] px-[15px] rounded-[9px] border border-[var(--teal-700)] bg-[var(--teal-700)] text-white font-semibold cursor-pointer whitespace-nowrap; }
+.btnTeal:hover:not(:disabled) { @apply bg-[var(--teal-900)]; }
+.btnTeal:disabled { @apply opacity-[.45] cursor-not-allowed; }
+.btnGhostActive { @apply border-[var(--teal-600)] text-[var(--teal-700)] bg-[var(--teal-50)]; }
+
+.ctrlRow { @apply flex items-center gap-2.5 flex-wrap mb-2.5; }
+.segTabs { @apply inline-flex bg-[#edf1f0] rounded-[10px] p-[3px] gap-0.5; }
+.segTab { @apply border-0 bg-transparent px-[18px] py-[7px] rounded-lg font-medium text-[13px] text-[var(--muted)] cursor-pointer; }
+.segTabActive { @apply bg-white text-[var(--ink)] font-semibold shadow-[0_1px_3px_rgba(15,40,38,.12)]; }
+.ctrlSpacer { @apply flex-1; }
+.searchBox2 { @apply flex items-center gap-[7px] h-[34px] px-3 border border-[var(--line)] rounded-[9px] bg-white text-[var(--muted)] min-w-[200px]; }
+.searchBox2 input { @apply border-0 outline-0 text-[12.5px] text-[var(--ink)] bg-transparent w-full; }
+.toolBtn { @apply inline-flex items-center gap-[7px] h-[34px] px-3 rounded-[9px] border border-[var(--line)] bg-white text-[var(--ink)] font-medium text-[12.5px] cursor-pointer whitespace-nowrap; }
+.toolBtn:hover { @apply bg-[var(--soft)]; }
+.toolBtnActive { @apply border-[var(--teal-600)] text-[var(--teal-700)] bg-[var(--teal-50)]; }
+.zoomSel { @apply h-[34px] rounded-[9px] border border-[var(--line)] bg-white px-2 text-[12.5px] text-[var(--ink)]; }
+.legendRow { @apply flex items-center gap-[18px] text-xs text-[var(--muted)] border-b border-[var(--line)] pb-[11px] mb-3.5 flex-wrap; }
+.legendRow span { @apply inline-flex items-center gap-2; }
+.legendSpacer { @apply flex-1; }
+
+.mainCols { @apply grid grid-cols-[minmax(0,1fr)_296px] gap-4 items-start; }
+.rail { @apply sticky top-0 flex flex-col gap-3; }
+
+/* ── functional hierarchy card (design p1) ────────────────────── */
+.fcard { @apply bg-white border border-[var(--line)] rounded-xl px-5 pt-[18px] pb-5; }
+.fcard + .fcard { @apply mt-4; }
+.fcardHead { @apply flex justify-between items-center gap-3 mb-[18px] flex-wrap; }
+.fcardTitle { @apply text-[15px] font-semibold; }
+.fcardMeta { @apply text-xs text-[var(--muted)]; }
+
+.rootWrap { @apply flex flex-col items-center; }
+.rootPill { @apply inline-flex flex-col items-center gap-[3px] px-[30px] py-[11px] bg-[#123f3c] text-[#eafffb] rounded-[10px] shadow-[0_3px_10px_rgba(18,63,60,.25)]; }
+.rootTitle { @apply flex items-center gap-[9px] font-semibold text-[15px]; }
+.rootSub { @apply text-[11px] opacity-[.72]; }
+.fxStem { @apply w-px h-[18px] bg-[#b6c6c3]; }
+.fxBus { @apply relative h-0 border-t border-[#b6c6c3] mx-[calc(100%/6)]; }
+.divGrid { @apply grid grid-cols-3 gap-[18px] mt-[26px] relative; }
+
+.divCard { @apply relative border border-[#dbe3e1] rounded-[10px] bg-[#fdfefe]; }
+.divCard::before {
+  content: ""; @apply absolute top-[-26px] left-[calc(50%-.5px)] w-px h-[26px] bg-[#b6c6c3];
+}
+.divCardTop { @apply flex items-center justify-between gap-2 px-[15px] pt-3 pb-[7px] pl-[15px]; }
+.divName { @apply text-sm font-semibold; }
+.divMenuBtn { @apply w-[26px] h-[26px] border-0 bg-transparent rounded-md text-[var(--muted)] cursor-pointer grid place-items-center; }
+.divMenuBtn:hover { @apply bg-[var(--soft)] text-[var(--ink)]; }
+.divMeta { @apply flex items-center gap-1.5 px-[15px] pb-2.5 text-[11.5px] text-[var(--muted)] border-b border-[#e8eeed]; }
+.deptList { @apply p-1.5; }
+.deptRow { @apply flex items-center gap-2 w-full text-left px-2.5 py-2 rounded-lg border border-transparent bg-transparent cursor-pointer text-[var(--ink)]; }
+.deptRow:hover { @apply bg-[var(--soft)]; }
+.deptRowOpen { @apply bg-[#e9f4f1] border-[#c9e4db] text-[#0d6b64]; }
+.deptChev { @apply shrink-0 w-3 text-[10px] text-[var(--muted)]; }
+.deptInfo { @apply flex-1 min-w-0; }
+.deptTitle { @apply block text-[13px] font-semibold; }
+.deptSub { @apply block text-[10.5px] text-[var(--muted)] font-normal; }
+.deptRowOpen .deptSub { @apply text-[#4f7a74]; }
+.deptPencil { @apply shrink-0 text-[var(--muted)] opacity-[.75]; }
+.deptPencil:hover { @apply opacity-100 text-[var(--teal-700)]; }
+.deptUnits { @apply mx-[26px] mt-0.5 mb-1.5 pl-[11px] border-l-2 border-[#cfdcd8] flex flex-col gap-[3px]; }
+.miniUnit { @apply flex items-center gap-[7px] text-xs px-2 py-1 rounded-md border border-transparent text-[var(--ink)]; }
+.miniUnit:hover { @apply bg-[var(--soft)] border-[var(--line)]; }
+.miniUnitCode { @apply ml-auto text-[10px] text-[var(--muted)]; }
+.miniUnitEmpty { @apply text-[11.5px] text-[var(--muted)] italic px-2 py-[3px]; }
+.divCardFoot { @apply border-t border-[#e8eeed] px-[15px] py-2 text-[11px] text-[var(--muted)]; }
+
+/* ── distributed workforce card ───────────────────────────────── */
+.wfEyebrow { @apply text-[10.5px] font-bold tracking-[0.09em] uppercase text-[#0d7a77]; }
+.wfHeadRow { @apply flex justify-between items-center gap-3 mt-[5px] mb-2 flex-wrap; }
+.wfTitle { @apply text-[17px] font-semibold; }
+.wfDesc { @apply text-[12.5px] text-[var(--muted)] mb-4; }
+.wfDiv { @apply mt-[18px]; }
+.wfDivHead { @apply flex items-center gap-[9px] text-sm font-semibold mb-2.5; }
+.wfDivHead svg { @apply text-[var(--teal-700)]; }
+.wfDivLine { @apply flex-1 h-px bg-[var(--line)]; }
+.wfDept { @apply mb-3; }
+.wfDeptLabel { @apply flex items-center gap-[9px] mb-[7px]; }
+.deptTag { @apply text-[10.5px] font-bold bg-[#e8f3f0] text-[#0d6b64] rounded-[5px] px-2 py-[2.5px]; }
+.wfDeptLabel span.muted { @apply text-[11.5px]; }
+.wfCols { @apply grid grid-cols-[minmax(150px,.8fr)_1.35fr_1.35fr] gap-3; }
+.wfPanel { @apply border border-[#e2e8e7] rounded-[10px] bg-[#fafcfb] px-3 py-2.5 min-h-[84px]; }
+.wfPanelHead { @apply flex items-center gap-1.5 text-[11px] text-[var(--muted)] mb-2; }
+.wfChips { @apply flex flex-wrap gap-1.5; }
+.uChip { @apply inline-flex items-center gap-[5px] text-[11.5px] font-medium px-[9px] py-[4.5px] border border-[#d7dfdd] rounded-md bg-white text-[var(--ink)]; }
+.uChip:hover { @apply border-[#0d7a77] text-[#0d6b64]; }
+.uChipHot { @apply border-[#0d7a77] bg-[#e9f4f1] text-[#0d6b64]; }
+.addChip { @apply inline-flex items-center gap-[5px] text-[11.5px] font-semibold px-[9px] py-[4.5px] border border-dashed border-[#7bb7ac] rounded-md bg-transparent text-[#0d6b64]; }
+.addChip:hover { @apply bg-[#e9f4f1]; }
+.corpStaff { @apply flex flex-col gap-[3px] text-xs; }
+.corpStaff strong { @apply text-xs; }
+.corpStaff span { @apply text-[11px] text-[var(--muted)]; }
+
+/* ── notes / naming strip ─────────────────────────────────────── */
+.noteInfo { @apply flex gap-2.5 items-start bg-[#e9f4f1] border border-[#cfe6de] rounded-[10px] px-3.5 py-[11px] text-xs text-[#23514d] mt-4 leading-[1.5]; }
+.noteInfo svg { @apply text-[var(--teal-700)] mt-px; }
+.nameStrip { @apply flex items-center gap-2.5 flex-wrap bg-[#f3f6f5] border border-[var(--line)] rounded-[10px] px-3.5 py-2.5 text-xs text-[var(--muted)] mt-3; }
+.nameStripLabel { @apply inline-flex items-center gap-1.5 font-semibold text-[#465c5a]; }
+.nameTag { @apply bg-white border border-[#d7dfdd] rounded-md px-2 py-[3px] text-[11.5px] text-[var(--ink)] font-medium; }
+.privLine { @apply flex items-center gap-2 text-xs text-[var(--muted)] mt-3; }
+
+/* ── operational-directors rail ───────────────────────────────── */
+.railCard { @apply bg-white border border-[var(--line)] rounded-xl p-4; }
+.railCardTeal { @apply bg-[#e9f4f1] border-[#cfe6de]; }
+.railTop { @apply flex justify-between items-center mb-2.5; }
+.railEyebrow { @apply text-[10px] font-bold tracking-[0.07em] uppercase text-[#0d6b64] bg-white border border-[#cfe6de] rounded-md px-2 py-[3px]; }
+.railIcon { @apply text-[var(--teal-700)]; }
+.railTitle { @apply text-[17px] font-semibold text-[#0d5551] mb-[5px]; }
+.railSub { @apply text-[11.5px] text-[#4b6b67] leading-[1.5]; }
+.railGroup { @apply text-[11.5px] font-semibold text-[var(--muted)] mt-3.5 mb-[7px]; }
+.railRow { @apply flex items-center gap-[9px] w-full px-2.5 py-2 mb-1.5 rounded-lg border border-[#e2e8e7] bg-white cursor-pointer text-[var(--ink)] text-left; }
+.railRow:hover { @apply border-[#0d7a77]; }
+.railRowActive { @apply bg-[#e9f4f1] border-[#9ccfc2]; }
+.railCode { @apply shrink-0 text-[10.5px] font-bold bg-[#eef3f2] rounded-[5px] px-1.5 py-[2.5px] text-[#33524f]; }
+.railRowName { @apply flex-1 min-w-0 text-[12.5px] font-medium; }
+.railRowName small { @apply block text-[10.5px] text-[var(--muted)] font-normal; }
+.railNote { @apply flex gap-2 text-[11.5px] text-[var(--muted)] mt-3 mb-1 leading-[1.5]; }
+.railNote svg { @apply mt-px shrink-0; }
+.railBtn { @apply flex items-center justify-center gap-[7px] w-full mt-3 h-9 rounded-[9px] border border-[var(--line)] bg-white font-semibold text-[12.5px] text-[var(--ink)] cursor-pointer; }
+.railBtn:hover { @apply bg-[var(--soft)]; }
+
+/* ── "By geography" view ──────────────────────────────────────── */
+.geoCatRow { @apply flex items-center gap-2.5 w-full text-left px-[15px] py-3 border border-[#dbe3e1] rounded-[10px] bg-[#fbfcfc] font-semibold text-[13.5px] text-[var(--ink)] cursor-pointer mb-2; }
+.geoCatRow:hover { @apply border-[#b6c6c3]; }
+.geoCatOpen { @apply border-[#9ccfc2] bg-[#e9f4f1] text-[#0d6b64]; }
+.geoCatMeta { @apply ml-auto text-[11px] text-[var(--muted)] font-medium; }
+.geoBody { @apply mx-0 mb-4 ml-5 pl-[15px] border-l-2 border-dotted border-[#7bb7ac] flex flex-col gap-2; }
+.geoZoneRow { @apply flex items-center gap-2.5 w-full text-left px-3 py-[9px] rounded-[9px] border border-[#e2e8e7] bg-white font-medium text-[13px] text-[var(--ink)] cursor-pointer; }
+.geoZoneRow:hover { @apply border-[#0d7a77]; }
+.geoZoneOpen { @apply bg-[#e9f4f1] border-[#9ccfc2]; }
+.geoDirTag { @apply ml-auto text-[10.5px] text-[var(--muted)] text-right; }
+.geoUnits { @apply mx-0 mb-1 ml-[18px] pl-[13px] border-l-2 border-dotted border-[#a7ccc4] flex flex-col gap-[3px]; }
+.geoUnitRow { @apply flex items-center gap-2 text-xs px-2 py-[4.5px] rounded-md border border-transparent text-[var(--ink)]; }
+.geoUnitRow:hover { @apply bg-[var(--soft)] border-[var(--line)]; }
+.geoUnitMeta { @apply ml-auto text-[10.5px] text-[var(--muted)]; }
+.dotTag { @apply shrink-0 text-[10px] text-[#0d7a77] border border-dashed border-[#7bb7ac] rounded-[5px] px-1.5 py-px; }
+
+/* ── dialogs ──────────────────────────────────────────────────── */
+.iconBtn { @apply w-7 h-7 shrink-0 border-0 bg-transparent rounded-md text-[var(--muted)] cursor-pointer grid place-items-center; }
+.iconBtn:hover { @apply bg-[var(--soft)] text-[var(--ink)]; }
+.modalOverlay { @apply fixed inset-0 bg-[rgba(15,35,33,.38)] grid place-items-center z-[80] p-5; }
+.modal { @apply w-[min(440px,94vw)] bg-white rounded-xl border border-[var(--line)] shadow-[0_20px_60px_rgba(10,30,28,.28)] p-5; }
+.modalWide { @apply w-[min(560px,94vw)]; }
+.modalTitle { @apply text-[16.5px] font-semibold mb-1; }
+.modalSub { @apply text-[12.5px] text-[var(--muted)] mb-3.5 leading-[1.5]; }
+.modalFoot { @apply flex justify-end gap-2 mt-[18px]; }
+.modalLabel { @apply block text-xs font-semibold mb-[5px]; }
+.modalInput { @apply w-full h-[38px] px-3 rounded-lg border border-[var(--line)] bg-white text-[var(--ink)] text-[13px]; }
+.modalInput:focus { @apply outline-2 outline-[var(--teal-600)] border-[var(--teal-600)]; }
+.modalHelp { @apply text-[11px] text-[var(--muted)] mt-[5px]; }
+.modalError { @apply mt-2.5 bg-[#fef3f2] border border-[#fecdca] text-[#b42318] rounded-lg px-[11px] py-2 text-xs; }
+.menuPanel { @apply flex flex-col gap-0.5; }
+.menuBtn { @apply flex items-center gap-[9px] w-full text-left px-[11px] py-2 border-0 bg-transparent rounded-md text-[12.5px] text-[var(--ink)] cursor-pointer; }
+.menuBtn:hover { @apply bg-[var(--soft)]; }
+.menuBtnDanger { @apply text-[#b42318]; }
+.menuBtnDanger:hover { @apply bg-[#fef3f2]; }
+.menuSep { @apply h-px bg-[var(--line)] my-[3px]; }
+
+/* ── zone page (design p2) ────────────────────────────────────── */
+.zoneBar { @apply flex justify-between items-center gap-3 flex-wrap bg-white border border-[var(--line)] rounded-[10px] px-3 py-[9px] mb-3.5; }
+.zoneSelectors { @apply flex items-center gap-2 flex-wrap; }
+.pillSelect { @apply inline-flex items-center gap-[7px] h-[34px] pl-[11px] pr-2 border border-[var(--line)] rounded-lg bg-white text-[var(--ink)] text-[12.5px]; }
+.pillSelect svg { @apply text-[var(--teal-700)]; }
+.pillSelect select { @apply border-0 outline-0 bg-transparent font-semibold text-[var(--ink)] cursor-pointer; }
+.filterSet { @apply border-0 px-0.5 py-1.5 flex flex-col gap-1.5 min-w-[150px]; }
+.filterSet legend { @apply text-[11px] font-semibold text-[var(--muted)] mb-1; }
+.filterSet label { @apply flex items-center gap-2 text-[12.5px] cursor-pointer; }
+.linkBtn { @apply border-0 bg-transparent text-[var(--teal-700)] font-semibold text-xs cursor-pointer px-0.5 py-1; }
+.linkBtn:hover { @apply underline; }
+
+.zGrid { @apply grid grid-cols-[minmax(0,1fr)_250px] gap-4 items-start relative; }
+.zMain { @apply min-w-0; }
+.corpBar { @apply flex items-center gap-2.5 bg-[#123f3c] text-[#eafffb] rounded-[9px] px-4 py-[11px] mb-4; }
+.corpBar strong { @apply text-sm; }
+.corpBar span { @apply text-[11.5px] opacity-[.72] ml-1; }
+.corpBarSlim { @apply px-3.5 py-[9px]; }
+.zDivision { @apply mb-4; }
+.zDivBar { @apply flex items-center gap-[9px] px-0.5 py-[7px] mb-[9px] border-b border-[var(--line)]; }
+.zDivBar svg { @apply text-[var(--teal-700)]; }
+.zDivBar strong { @apply text-[13.5px]; }
+.zDivBar span { @apply text-[11.5px] text-[var(--muted)]; }
+.zDivBar em { @apply ml-auto not-italic text-[10.5px] text-[var(--muted)]; }
+.zDeptRow { @apply grid gap-3; }
+.zDeptCol { @apply min-w-0 flex flex-col gap-2; }
+.zDept { @apply flex items-start justify-between gap-2 border border-[#e2e8e7] rounded-[9px] bg-[#fafcfb] px-[11px] py-[9px]; }
+.zDept strong { @apply block text-[12.5px]; }
+.zDept span { @apply block text-[10.5px] text-[var(--muted)] mt-px; }
+.zDept svg { @apply text-[var(--muted)] mt-0.5; }
+.zUnit { @apply border border-[#cfe6de] rounded-[9px] bg-[#e9f4f1] px-[11px] py-[9px] cursor-pointer transition-[border-color,box-shadow]; }
+.zUnit strong { @apply block text-[12.5px] text-[#0d6b64]; }
+.zUnit span { @apply flex items-center gap-1.5 text-[10.5px] text-[#4f7a74] mt-[3px]; }
+.zUnitHot { @apply border-[#0d7a77] shadow-[0_0_0_2px_rgba(13,122,119,.18)]; }
+.zUnitMissing { @apply flex items-center gap-1.5 border border-dashed border-[#c9d3d1] rounded-[9px] bg-white px-[11px] py-2 text-[11.5px] text-[var(--teal-700)] font-medium; }
+.zUnitMissing:hover { @apply border-[var(--teal-600)] bg-[var(--teal-50)]; }
+.zSide { @apply flex flex-col gap-3; }
+.dirCard { @apply border border-[#9ccfc2] rounded-xl bg-white p-4 flex flex-col gap-2 transition-shadow; }
+.dirCardHot { @apply shadow-[0_0_0_3px_rgba(13,122,119,.15)]; }
+.dirCardTop { @apply flex items-center gap-2.5; }
+.dirCardTop svg { @apply text-[var(--teal-700)]; }
+.dirCardTop strong { @apply text-xl font-semibold text-[#0d5551] block; }
+.dirCardTop span { @apply text-[11px] text-[var(--muted)] block; }
+.dirCard h3 { @apply text-base font-semibold text-[var(--ink)]; }
+.dirCard p { @apply text-[11.5px] text-[var(--muted)] leading-[1.5]; }
+.dirName { @apply text-[12.5px] text-[#0d6b64] font-semibold; }
+.dirInherit { @apply text-[11px] text-[#4f7a74] bg-[#e9f4f1] border border-[#cfe6de] rounded-md px-2.5 py-1.5 text-center; }
+.footNote { @apply flex items-start gap-[9px] mt-3.5 px-3.5 py-2.5 border border-[var(--line)] rounded-[9px] bg-[#f8faf9] text-[11.5px] text-[var(--muted)] leading-[1.5]; }
+.footNote svg { @apply text-[var(--teal-700)] mt-px shrink-0; }
+.zonePageFoot { @apply flex justify-between items-center gap-3 mt-3.5 text-xs text-[var(--muted)] flex-wrap; }
+.zonePageFoot a { @apply inline-flex items-center gap-1.5 text-[var(--ink)] font-semibold; }
+
+/* ── create-unit page (design p3) ─────────────────────────────── */
+.cuRoot { @apply px-[26px] pt-5 pb-[34px] max-w-[1560px] mx-auto w-full; }
+.cuCrumbs { @apply text-[12.5px] text-[var(--muted)] mb-2.5; }
+.cuCrumbs b { @apply text-[var(--ink)] font-semibold; }
+.cuCrumbs i { @apply mx-1.5 not-italic; }
+.cuHead { @apply flex justify-between items-start gap-4 flex-wrap mb-4; }
+.bannerWide { @apply flex items-center gap-2.5 bg-[#e9f4f1] border border-[#cfe6de] rounded-[10px] px-4 py-[11px] text-[#0d5551] text-[12.5px] mb-4; }
+.bannerWide strong { @apply font-semibold; }
+.bannerWide span { @apply ml-auto text-[11.5px] text-[#4b6b67]; }
+.bannerWideWarn { @apply bg-[#fff4e5] border-[#f2d59b] text-[#8a5a00]; }
+.bannerWideWarn span { @apply text-[#8a5a00]; }
+
+.createCols3 { @apply grid grid-cols-[292px_minmax(0,1fr)_312px] gap-4 items-start; }
+.cuCard { @apply bg-white border border-[var(--line)] rounded-xl p-[18px]; }
+.cuCardHead { @apply flex justify-between items-start gap-2.5 mb-3.5; }
+.cuCardHead h3 { @apply text-[15.5px] font-semibold; }
+.cuCardHead p { @apply text-xs text-[var(--muted)] mt-[3px]; }
+.cuCardHead svg { @apply text-[var(--teal-700)] mt-0.5; }
+.cuUnsaved { @apply shrink-0 text-[10.5px] font-bold tracking-[0.04em] uppercase bg-[var(--soft)] border border-[var(--line)] text-[#4b5f5e] rounded-md px-2 py-[3px]; }
+.cuDivider { @apply h-px bg-[var(--line)] my-4; }
+.cuSectionLabel { @apply text-[10.5px] font-bold tracking-[0.09em] uppercase text-[var(--muted)] mt-1 mb-3; }
+.cuField { @apply mb-3.5; }
+.cuField > label { @apply block text-xs font-semibold mb-[5px]; }
+.cuSelect { @apply w-full h-10 px-3 rounded-[9px] border border-[var(--line)] bg-white text-[var(--ink)] text-[13px]; }
+.cuSelect:focus { @apply outline-2 outline-[var(--teal-600)] border-[var(--teal-600)]; }
+.cuInputLocked { @apply flex items-center gap-2 w-full h-10 px-3 rounded-[9px] border border-[var(--line)] bg-[var(--soft)] text-[var(--muted)] text-[13px]; }
+.cuInputLocked input { @apply flex-1 border-0 bg-transparent text-[13px] text-[var(--muted)] outline-0 min-w-0; }
+.cuHelp { @apply text-[11px] text-[var(--muted)] mt-[5px] leading-[1.45]; }
+.cuTwoCol { @apply grid grid-cols-2 gap-3; }
+.cuInherit { @apply border border-[#cfe6de] bg-[#e9f4f1] rounded-[10px] px-3.5 py-3 flex flex-col gap-1; }
+.cuInheritHead { @apply flex items-center justify-between gap-2 text-[11.5px] font-semibold text-[#0d5551]; }
+.cuInheritBadge { @apply inline-flex items-center gap-[5px] text-[10.5px] text-[#4f7a74]; }
+.cuInherit h4 { @apply text-[13.5px] font-semibold text-[#0d5551]; }
+.cuInherit p { @apply text-[11.5px] text-[#4b6b67] leading-[1.5]; }
+.cuFoot { @apply flex justify-between items-center gap-3 mt-[18px] pt-4 border-t border-[var(--line)]; }
+.cuFootNote { @apply text-[11.5px] text-[var(--muted)]; }
+
+/* placement-in-hierarchy tree */
+.placeTree { @apply mt-0.5 mb-1; }
+.pRow { @apply flex items-center gap-[7px] w-full text-left px-[7px] py-[5.5px] border-0 bg-transparent rounded-md text-[13px] text-[var(--ink)] cursor-pointer; }
+.pRow:hover { @apply bg-[var(--soft)]; }
+.pRowRoot { @apply font-bold; }
+.pRowStrong { @apply font-semibold; }
+.pRowSel { @apply text-[#0d6b64] font-semibold; }
+.pRowMuted { @apply text-[var(--muted)] font-medium; }
+.pChev { @apply shrink-0 w-3 text-[10px] text-[var(--muted)]; }
+.pKids { @apply ml-[11px] pl-[10px] border-l border-[#dbe4e2]; }
+.pMeta { @apply text-[11px] text-[var(--muted)] py-0.5 pl-[26px] pr-2; }
+.pChip { @apply inline-flex items-center gap-[5px] text-[10.5px] bg-[var(--soft)] border border-[var(--line)] rounded-[5px] px-[7px] py-0.5 text-[#4b5f5e]; }
+.pNew { @apply flex items-center gap-1.5 mx-0 my-[3px] ml-[22px] px-2.5 py-1.5 bg-[#e9f4f1] border border-[#9ccfc2] rounded-md text-[12.5px] font-semibold text-[#0d6b64]; }
+
+/* reporting preview chain */
+.repBox { @apply border border-[#dbe3e1] rounded-[10px] bg-[#fbfcfc] px-[13px] py-[11px]; }
+.repBoxTeal { @apply bg-[#e9f4f1] border-[#cfe6de]; }
+.repBoxOut { @apply border-[#0d7a77] bg-white; }
+.repLabel { @apply text-[10px] font-bold tracking-[0.07em] uppercase text-[var(--muted)]; }
+.repLabelTeal { @apply text-[#0d6b64]; }
+.repName { @apply text-[13.5px] font-semibold mt-[3px] mb-[5px] text-[var(--ink)]; }
+.repNameTeal { @apply text-[#0d6b64]; }
+.repMeta { @apply flex items-center gap-1.5 text-[11px] text-[var(--muted)]; }
+.repLink { @apply text-[11px] text-[var(--muted)] border-l-2 border-[#cfd8d6] mx-0 my-[7px] ml-[14px] pl-[11px]; }
+.repLinkDash { @apply border-dashed border-l-[#7bb7ac] text-[#0d6b64]; }
+.repNoteCard { @apply border border-[var(--line)] rounded-[10px] bg-[#f8faf9] px-3.5 py-3 mt-3; }
+.repNoteCard strong { @apply block text-[12.5px] mb-1; }
+.repNoteCard p { @apply text-[11.5px] text-[var(--muted)] leading-[1.5]; }
+.repNoteLink { @apply inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-[var(--ink)]; }
+.repNoteTeal { @apply border-[#cfe6de] bg-[#e9f4f1]; }
+
+/* ── Director picker (dialog with a searchable user list) ─────── */
+.pickerList { @apply mt-2.5 max-h-[280px] overflow-y-auto border border-[var(--line)] rounded-[10px] bg-[var(--card)]; }
+.pickerEmpty { @apply p-[18px] text-center text-[var(--muted)] text-[12.5px]; }
+.pickerRow { @apply flex items-center gap-2.5 w-full text-left px-3 py-[9px] border-0 border-b border-[var(--line)] bg-transparent text-[var(--ink)] cursor-pointer; }
+.pickerRow:last-child { @apply border-b-0; }
+.pickerRow:hover:not(:disabled) { @apply bg-[var(--teal-50)]; }
+.pickerRow:disabled { @apply opacity-60 cursor-default; }
+.pickerRowActive { @apply bg-[var(--teal-100)]; }
+.pickerAvatar { @apply inline-flex items-center justify-center w-[26px] h-[26px] rounded-full shrink-0 bg-[var(--soft)] text-[var(--teal-700)]; }
+.pickerInfo { @apply flex flex-col gap-px flex-1 min-w-0; }
+.pickerInfo strong { @apply text-[12.5px] font-semibold; }
+.pickerInfo small { @apply text-[11px] text-[var(--muted)] overflow-hidden text-ellipsis; }
+.pickerRole { @apply text-[10.5px] font-semibold text-[var(--teal-700)] bg-[var(--teal-100)] rounded-md px-[7px] py-0.5 shrink-0; }
+.pickerBusy { @apply text-[11px] text-[var(--muted)] shrink-0; }
+
+/* ── Geographies index (screen: list of zones + regions) ──────── */
+.geoGrid { @apply grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-3; }
+.geoCard { @apply flex flex-col gap-2 p-3.5 border border-[var(--line)] rounded-xl bg-[var(--card)] transition-[border-color,box-shadow]; }
+.geoCard:hover { @apply border-[var(--teal-200)] shadow-[0_2px_10px_rgb(23_64_63_/_8%)]; }
+.geoCardTop { @apply flex items-center gap-[9px]; }
+.geoChip { @apply inline-flex items-center justify-center min-w-[46px] h-6 px-2 rounded-md bg-[var(--teal-100)] text-[var(--teal-700)] text-[11.5px] font-bold tracking-[0.03em]; }
+.geoName { @apply text-[13px] font-semibold; }
+.geoMeta { @apply flex items-center gap-1.5 text-[11.5px] text-[var(--muted)]; }
+.geoDir { @apply flex items-center gap-1.5 text-xs; }
+.geoDirName { @apply font-semibold text-[var(--ink)]; }
+.geoDirUnassigned { @apply text-[var(--muted)] italic; }
+.geoFoot { @apply flex items-center justify-between gap-2 mt-auto pt-1.5; }
+
+/* ── Department functional director row ──────────────────────── */
+.deptDirector { @apply flex items-center gap-1.5 mt-1 text-[11.5px] text-[var(--muted)]; }
+.deptDirectorName { @apply text-[var(--ink)] font-semibold; }
+.deptDirectorUnassigned { @apply italic; }
+.deptAssignBtn { @apply inline-flex items-center gap-[5px] ml-auto border border-[var(--line)] bg-[var(--card)] rounded-md px-[7px] py-0.5 text-[11px] text-[var(--muted)] cursor-pointer; }
+.deptAssignBtn:hover { @apply bg-[var(--soft)] text-[var(--teal-700)] border-[var(--teal-200)]; }
+
+/* ── placement badge ────────────────────────────────────────── */
+.placementBadge { @apply shrink-0 text-[10px] font-semibold px-1.5 py-px rounded-md border border-transparent ml-2; }
+.placementCorporate { @apply bg-[#fdecea] text-[#b42318] border-[#f5c6c1]; }
+.placementBadge:not(.placementCorporate) { @apply bg-[#e9f4f1] text-[#0d6b64] border-[#c9e4db]; }
+
+/* ── category / section / group chips under department ──────── */
+.deptUnitHead { @apply flex items-center gap-2.5 flex-wrap mt-0.5 mb-1 text-[10.5px]; }
+.deptCatLabel { @apply text-[var(--muted)] font-medium uppercase tracking-[0.04em]; }
+.deptCatChip { @apply inline-flex items-center gap-[5px] h-5 px-[7px] rounded-md bg-[#e9f4f1] text-[#0d6b64] border border-[#c9e4db]; }
+.deptSectionChip { @apply inline-flex items-center gap-[5px] h-5 px-[7px] rounded-md bg-[#eef7f4] text-[#14532d] border border-[#bbf7d0]; }
+.deptGroupList { @apply ml-1.5 gap-[3px]; }
+.deptGroupChip { @apply inline-flex items-center gap-1 h-[18px] px-[5px] rounded bg-[#f3f4f6] text-[#4b5563] border border-[#e5e7eb] text-[10px]; }
+
+.deptUserCount { @apply text-[9px] text-[var(--muted)] font-medium; }
+
+.deptUserList { @apply mx-0 my-1 mb-1.5 ml-[26px] pl-[11px] border-l-2 border-[#cfdcd8] flex flex-col gap-0.5; }
+
+.deptUserRow { @apply flex items-center gap-1.5 text-[11px] px-1.5 py-0.5 rounded-md bg-[var(--soft)] text-[var(--ink)]; }
+
+.deptUserRow svg { @apply text-[var(--muted)] shrink-0; }
+
+.deptUserName { @apply font-medium; }
+
+.deptUserRole { @apply text-[10px] text-[var(--muted)] ml-auto; }
+
+.deptUserOrgUnit { @apply text-[10px] text-[#6a7a79] italic ml-2; }
+
+.reportBox { @apply mx-[18px] mt-2.5 px-[11px] py-[9px] border border-[var(--line)] rounded-[10px] bg-[rgba(13,148,136,.06)]; }
+.reportRow { @apply flex items-center gap-2 text-[12.5px] py-0.5; }
+.reportLabel { @apply w-[74px] text-[10.5px] font-bold uppercase tracking-[0.04em] text-[var(--muted)]; }
+.reportName { @apply flex-1 font-semibold min-w-0 overflow-hidden text-ellipsis whitespace-nowrap; }
+.reportKind { @apply text-[10px] text-[var(--muted)]; }
+.reportNote { @apply mt-1.5 text-[11px] text-[var(--muted)] leading-[1.4]; }
+
+.filters { @apply flex flex-wrap gap-1.5 px-[18px] pt-2.5; }
+.fChip { @apply border border-[var(--line)] bg-transparent text-[11px] px-[9px] py-[3px] rounded-full cursor-pointer; }
+.fChip:hover { @apply bg-[rgba(13,148,136,.1)]; }
+.fChip[data-on='true'] { @apply bg-[#0f766e] border-[#0f766e] text-white; }
+
+.deptBadge { @apply self-start mt-0.5 text-[10px] px-[7px] py-px rounded-md bg-[rgba(13,148,136,.14)] text-[#0f766e]; }

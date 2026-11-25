@@ -1,0 +1,379 @@
+// SQLite edition — enums are modelled as String columns (SQLite has no enums),
+// JSON payloads are stored as String (SQLite has no Json type) and decimals as
+// Float. The canonical enum values live in lib/enums.ts.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model OrgUnit {
+  id       String    @id @default(uuid())
+  name     String
+  type     String
+  parentId String?
+  parent   OrgUnit?  @relation("OrgHierarchy", fields: [parentId], references: [id])
+  children OrgUnit[] @relation("OrgHierarchy")
+
+  path String  @unique
+  code String?
+
+  placement String?
+
+  users      User[]
+  assets     Asset[]
+  workOrders WorkOrder[]
+  maintenanceSchedules MaintenanceSchedule[]
+
+  departmentMembers User[] @relation("UserDepartment")
+
+  createdAt DateTime @default(now())
+
+  @@index([path])
+}
+
+model Vendor {
+  id          String   @id @default(uuid())
+  name        String
+  contactName String?
+  email       String?
+  phone       String?
+  address     String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assets Asset[]
+}
+
+model ApiKey {
+  id          String   @id @default(uuid())
+  keyHash     String   @unique
+  key         String?  @unique
+  name        String
+  active      Boolean  @default(true)
+  createdById String?
+  createdBy   User?    @relation("ApiKeyCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime?
+}
+
+model Asset {
+  id String @id @default(uuid())
+
+  itemCode            String
+  itemCodeDescription String?
+  description         String?
+  tagNumber           String?
+  serialNumber        String  @unique
+  assetDescription    String?
+  category            String?
+  owningDepartment    String?
+  criticality         String?
+  wipClass            String?
+  politicalArea       String?
+  maintainable        Boolean? @default(false)
+  active              Boolean? @default(true)
+  productionOrg       String?
+  equipmentItem       String?
+  eqpSerial           String?
+  faCategory          String?
+  faNumber            String?
+  parentAsset         String?
+  parentSerial        String?
+  locationName        String?
+  locationCode        String?
+  address             String?
+  warrantyExpiration  String?
+  checkedOut          Boolean? @default(false)
+  faSynced            Boolean? @default(false)
+  operational         Boolean? @default(true)
+  customFlag          Boolean? @default(false)
+  wirelessSiteId      String?
+  photoUrl            String?
+
+  vendorId     String?
+  vendor       Vendor?  @relation(fields: [vendorId], references: [id])
+  purchaseDate DateTime?
+  purchaseCost Float?
+  poNumber     String?
+
+  customFields String?
+
+  orgUnitId    String
+  orgUnit      OrgUnit @relation(fields: [orgUnitId], references: [id])
+
+  parentAssetId  String?
+  parentAssetRef Asset?  @relation("AssetHierarchy", fields: [parentAssetId], references: [id])
+  children       Asset[] @relation("AssetHierarchy")
+  maintenanceSchedules MaintenanceSchedule[]
+  events         AssetEvent[]
+
+  assetGroup   String?
+  status       String?
+  startedAt    DateTime?
+  assignedToId String?
+  assignedTo   User?    @relation(fields: [assignedToId], references: [id])
+  workOrders   WorkOrder[]
+
+  createdAt    DateTime @default(now())
+
+  @@index([orgUnitId, createdAt])
+  @@index([createdAt])
+}
+
+model Permission {
+  id    String           @id @default(uuid())
+  name  String
+  roles RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  role         String
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+}
+
+model AssetEvent {
+  id        String   @id @default(uuid())
+  assetId   String
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  type      String
+  summary   String
+  detail    String?
+  createdAt DateTime @default(now())
+
+  performedById String?
+  performedBy   User?   @relation("AssetEventPerformedBy", fields: [performedById], references: [id])
+  performedByName String?
+  orgUnitPath String?
+
+  @@index([assetId, createdAt])
+  @@index([type, createdAt])
+  @@index([orgUnitPath, createdAt])
+}
+
+model Audit {
+  id         String   @id @default(uuid())
+  action     String
+  actionType String
+  createdAt  DateTime @default(now())
+
+  performedById   String
+  performedByUser User   @relation("PerformedBy", fields: [performedById], references: [id])
+
+  targetUserName  String?
+  targetUserEmail String?
+
+  targetAssetId  String?
+  targetAssetTag String?
+
+  metadata String?
+
+  @@index([actionType, createdAt])
+}
+
+model User {
+  id       String  @id @default(uuid())
+  email    String  @unique
+  password String
+  name     String
+  phone    String?
+  photo    String  @default("/default-avatar.png")
+
+  role String
+
+  orgUnitId String
+  orgUnit   OrgUnit @relation(fields: [orgUnitId], references: [id])
+
+  departmentId String?
+  department   OrgUnit?   @relation("UserDepartment", fields: [departmentId], references: [id])
+
+  geoZoneId String?
+  geoZone   GeoZone? @relation(fields: [geoZoneId], references: [id])
+
+  originalOrgUnitId String?
+
+  employeeId String?
+  jobTitle   String?
+  status     String    @default("ACTIVE")
+  lastLoginAt DateTime?
+
+  managerId String?
+  manager   User?     @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
+  reports   User[]    @relation("UserManager")
+
+  auditsPerformed    Audit[]     @relation("PerformedBy")
+  assignedWorkOrders WorkOrder[] @relation("WorkOrderAssignedTo")
+  createdWorkOrders  WorkOrder[] @relation("WorkOrderCreatedBy")
+  checkedOutWorkOrders WorkOrder[] @relation("WorkOrderCheckedOutBy")
+  completedWorkOrders  WorkOrder[] @relation("WorkOrderCompletedBy")
+  createdMaintenanceSchedules MaintenanceSchedule[] @relation("MaintenanceCreatedBy")
+  createdApiKeys ApiKey[] @relation("ApiKeyCreatedBy")
+  assetEvents    AssetEvent[] @relation("AssetEventPerformedBy")
+  woComments WoComment[]
+  assignedAssets     Asset[]
+
+  createdAt DateTime @default(now())
+
+  mustChangePassword Boolean   @default(false)
+  passwordChangedAt  DateTime?
+
+  permissionOverride UserPermissionOverride?
+
+  @@index([departmentId])
+  @@index([managerId])
+  @@index([status])
+  @@index([role, name])
+}
+
+model WorkOrder {
+  id          String  @id @default(uuid())
+  title       String?
+  description String?
+
+  orgUnitId String
+  orgUnit   OrgUnit @relation(fields: [orgUnitId], references: [id])
+
+  assetId String?
+  asset   Asset?  @relation(fields: [assetId], references: [id])
+
+  assignedToId String?
+  assignedTo   User?   @relation("WorkOrderAssignedTo", fields: [assignedToId], references: [id])
+
+  status   String  @default("CREATED")
+  priority String?
+
+  scheduledAt    DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  checkedOutById String?
+  checkedOutAt   DateTime?
+  checkedOutBy   User?   @relation("WorkOrderCheckedOutBy", fields: [checkedOutById], references: [id])
+  completedById  String?
+  completedBy    User?   @relation("WorkOrderCompletedBy", fields: [completedById], references: [id])
+
+  workOrderNo String? @unique
+  createdById String?
+  createdBy   User?   @relation("WorkOrderCreatedBy", fields: [createdById], references: [id])
+
+  archivedAt     DateTime?
+  laborHours     Float?
+  estimatedCost  Float?
+  actualCost     Float?
+  partsCost      Float?
+  createdAt DateTime @default(now())
+
+  assetSnapshot String?
+  comments WoComment[]
+  @@index([orgUnitId, status])
+  @@index([assignedToId])
+}
+
+model WoComment {
+  id           String   @id @default(uuid())
+  workOrderId  String
+  workOrder    WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  text         String
+  createdAt    DateTime @default(now())
+
+  @@index([workOrderId, createdAt])
+}
+
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model PermissionMatrix {
+  id        Int      @id @default(1)
+  matrix    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MaintenanceSchedule {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  templateId      String?
+
+  assetId         String?
+  asset           Asset?   @relation(fields: [assetId], references: [id])
+  orgUnitId       String
+  orgUnit         OrgUnit  @relation(fields: [orgUnitId], references: [id])
+
+  intervalDays    Int      @default(90)
+  nextRunAt       DateTime
+  lastRunAt       DateTime?
+  priority        String   @default("MEDIUM")
+  active          Boolean  @default(true)
+
+  createdById     String?
+  createdBy       User?    @relation("MaintenanceCreatedBy", fields: [createdById], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([nextRunAt, active])
+}
+
+model UserPermissionOverride {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adminGrants String?
+  woGrants    String?
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+model OrgNode {
+  id        String      @id @default(uuid())
+  kind      String
+  code      String?
+  name      String
+  subtitle  String?
+  sortOrder Int         @default(0)
+
+  parentId String?
+  parent   OrgNode? @relation("OrgTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children OrgNode[] @relation("OrgTree")
+
+  zoneId String?
+  zone   GeoZone? @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+
+  placement String?
+
+  directorUserId String?
+  directorName   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([parentId, zoneId])
+  @@index([kind])
+  @@index([zoneId])
+}
+
+model GeoZone {
+  id       String       @id @default(uuid())
+  code     String       @unique
+  name     String
+  category String
+  sortOrder Int          @default(0)
+
+  directorUserId String?
+  directorName   String?
+
+  units OrgNode[]
+
+  users User[]
+}

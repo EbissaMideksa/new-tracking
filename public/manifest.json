@@ -1,0 +1,17 @@
+{
+  "name": "Ethio Telecom Asset Tracking",
+  "short_name": "Asset Tracking",
+  "description": "Telecom asset management system",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+
+// lib/woInclude.ts
+export const WO_INCLUDE = {
+  orgUnit: {
+    select: { id: true, name: true, path: true, type: true },
+  },
+  assignedTo:  { select: { id: true, name: true } },
+  createdBy:   { select: { id: true, name: true } },
+  checkedOutBy:{ select: { id: true, name: true } },
+  completedBy: { select: { id: true, name: true } },
+  asset: {
+    select: {
+      id:                  true,
+      itemCode:            true,
+      itemCodeDescription: true,
+      tagNumber:           true,
+      serialNumber:        true,
+      assetDescription:    true,
+      category:            true,
+      owningDepartment:    true,
+      criticality:         true,
+      wipClass:            true,
+      politicalArea:       true,
+      maintainable:        true,
+      active:              true,
+      productionOrg:       true,
+      equipmentItem:       true,
+      eqpSerial:           true,
+      faCategory:          true,
+      faNumber:            true,
+      parentAsset:         true,
+      parentSerial:        true,
+      locationName:        true,
+      locationCode:        true,
+      address:             true,
+      warrantyExpiration:  true,
+      checkedOut:          true,
+      faSynced:            true,
+      operational:         true,
+      customFlag:          true,
+      wirelessSiteId:      true,
+      orgUnit: {
+        select: { id: true, name: true, type: true, path: true },
+      },
+    },
+  },
+} as const

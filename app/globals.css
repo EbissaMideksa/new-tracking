@@ -1,0 +1,325 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --shell-bg: #f5f5f5;
+
+  /* ── Responsive design tokens ────────────────────────────────────────────
+     These scale across breakpoints (1440 / 1366 / 1280 / 1024 / 768 / 412 /
+     390 / 375 / 320). Components reference them with var(--token, fallback). */
+  --page-pad: 24px;
+  --sidebar-width: 220px;
+
+  /* Grant-matrix tokens (shared by GrantMatrixTable & WoGrantMatrixTable) */
+  --gm-h1: 22px;
+  --gm-h2: 17px;
+  --gm-font: 13px;
+  --gm-font-sm: 12px;
+  --gm-font-xs: 10px;
+  --gm-pad-x: 20px;
+  --gm-search-w: 200px;
+  --gm-pill-min: 110px;
+  --gm-label-min: 220px;
+  --gm-role-min: 90px;
+  --gm-cell: 32px;
+  --gm-cell-font: 14px;
+  --gm-th-pad: 10px;
+  --gm-thead-h: 64px;
+  --gm-row-pad: 9px;
+  --gm-table-max-h: calc(100vh - 260px);
+
+  /* Assets-page tokens */
+  --asset-action-w: 110px;
+  --asset-input-w: 120px;
+  --asset-font: 11px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Dark mode — applied via the `dark` class on <html> by ThemeProvider.
+   Components use hardcoded inline colours, so the common dark-text /
+   light-surface values are overridden with !important via attribute
+   selectors. Coloured accents (badges, buttons, role pills) use different
+   hex values and are intentionally left alone. */
+html.dark {
+  --background: #0b1220;
+  --foreground: #ffffff;
+  --shell-bg: #0b1220;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── Dark mode: white writings + dark surfaces ──────────────────────────── */
+html.dark body {
+  color: #ffffff !important;
+}
+
+/* Headings / body / muted text → white (inline colours) */
+html.dark [style*="color:#0f172a"],
+html.dark [style*="color:#111827"],
+html.dark [style*="color:#1f2937"],
+html.dark [style*="color:#1e293b"],
+html.dark [style*="color:#334155"],
+html.dark [style*="color:#374151"],
+html.dark [style*="color:#475569"],
+html.dark [style*="color:#64748b"],
+html.dark [style*="color:#6b7280"] {
+  color: #ffffff !important;
+}
+html.dark [style*="color:#94a3b8"],
+html.dark [style*="color:#9ca3af"],
+html.dark [style*="color:#cbd5e1"] {
+  color: #cbd5e1 !important;
+}
+
+/* Tailwind text-gray classes (Topbar / Sidebar / etc.) */
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: #ffffff !important;
+}
+html.dark .text-gray-400 {
+  color: #cbd5e1 !important;
+}
+
+/* Form controls */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: #e5e7eb !important;
+  background-color: #111827 !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Light surfaces (cards / panels) → dark (inline + Tailwind) */
+html.dark [style*="background:#fff"],
+html.dark [style*="background:#ffffff"],
+html.dark [style*="background-color:#fff"],
+html.dark [style*="background-color:#ffffff"],
+html.dark [style*="background:#f8fafc"],
+html.dark [style*="background:#fafafa"],
+html.dark [style*="background:#f9fafb"],
+html.dark [style*="background:#f5f5f5"],
+html.dark [style*="background:#f1f5f9"],
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-200 {
+  background-color: #111827 !important;
+}
+
+/* Light borders → dark (inline + Tailwind) */
+html.dark [style*="#e2e8f0"],
+html.dark [style*="#e5e7eb"],
+html.dark [style*="#f1f5f9"],
+html.dark [style*="#d1d5db"],
+html.dark .border-gray-200,
+html.dark .border-gray-300 {
+  border-color: #1f2937 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE LAYER
+   Breakpoints: 1440 · 1366 · 1280 · 1024 · 768 · 412 · 390 · 375 · 320
+   Tokens defined in :root are overridden here per breakpoint.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ≤1366px — large laptop */
+@media (max-width: 1366px) {
+  :root {
+    --gm-label-min: 210px;
+    --gm-table-max-h: calc(100vh - 240px);
+  }
+}
+
+/* ≤1280px — small laptop */
+@media (max-width: 1280px) {
+  :root {
+    --gm-label-min: 200px;
+    --gm-role-min: 84px;
+    --gm-table-max-h: calc(100vh - 230px);
+  }
+}
+
+/* ≤1024px — tablet landscape / small laptop */
+@media (max-width: 1024px) {
+  :root {
+    --page-pad: 18px;
+    --sidebar-width: 200px;
+    --gm-pad-x: 16px;
+    --gm-cell: 30px;
+    --gm-label-min: 180px;
+    --gm-role-min: 72px;
+    --gm-pill-min: 100px;
+    --gm-thead-h: 64px;
+    --gm-table-max-h: calc(100vh - 220px);
+  }
+}
+
+/* ≤768px — tablet portrait */
+@media (max-width: 768px) {
+  :root {
+    --page-pad: 14px;
+    --sidebar-width: 56px;       /* auto-collapse to icon rail */
+    --gm-h1: 19px;
+    --gm-h2: 15px;
+    --gm-font: 12px;
+    --gm-font-sm: 11px;
+    --gm-pad-x: 14px;
+    --gm-cell: 26px;
+    --gm-cell-font: 12px;
+    --gm-label-min: 150px;
+    --gm-role-min: 56px;
+    --gm-pill-min: 88px;
+    --gm-search-w: 150px;
+    --gm-th-pad: 8px;
+    --gm-thead-h: 54px;
+    --gm-row-pad: 7px;
+    --gm-table-max-h: calc(100vh - 200px);
+    --asset-action-w: 96px;
+    --asset-input-w: 100px;
+    --asset-font: 10px;
+  }
+}
+
+/* ≤412px — large mobile */
+@media (max-width: 412px) {
+  :root {
+    --page-pad: 10px;
+    --gm-h1: 17px;
+    --gm-h2: 14px;
+    --gm-font: 11px;
+    --gm-font-sm: 10px;
+    --gm-font-xs: 9px;
+    --gm-pad-x: 10px;
+    --gm-cell: 24px;
+    --gm-cell-font: 11px;
+    --gm-label-min: 120px;
+    --gm-role-min: 46px;
+    --gm-pill-min: 78px;
+    --gm-search-w: 120px;
+    --gm-th-pad: 6px;
+    --gm-thead-h: 50px;
+    --gm-row-pad: 6px;
+    --gm-table-max-h: calc(100vh - 180px);
+    --asset-action-w: 84px;
+    --asset-input-w: 84px;
+  }
+}
+
+/* ≤390px — modern mobile */
+@media (max-width: 390px) {
+  :root {
+    --gm-label-min: 110px;
+    --gm-role-min: 44px;
+  }
+}
+
+/* ≤375px — mobile */
+@media (max-width: 375px) {
+  :root {
+    --page-pad: 8px;
+    --gm-cell: 22px;
+    --gm-label-min: 100px;
+    --gm-role-min: 40px;
+    --gm-pill-min: 72px;
+    --gm-search-w: 100px;
+  }
+}
+
+/* ≤320px — small mobile */
+@media (max-width: 320px) {
+  :root {
+    --page-pad: 6px;
+    --gm-h1: 15px;
+    --gm-h2: 13px;
+    --gm-cell: 20px;
+    --gm-cell-font: 10px;
+    --gm-label-min: 88px;
+    --gm-role-min: 36px;
+    --gm-pill-min: 66px;
+  }
+}
+
+/* ── Grant-matrix scroll container ──────────────────────────────────────────
+   Bounded vertical scroll so position:sticky on <thead> and group header
+   rows actually pin while the table body scrolls. */
+.gm-scroll {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* ── Sticky group-header rows ("Visibility — 2 actions" etc.)
+   Pins the current group header just below the pinned column headers.
+   Multiple sticky rows at the same top self-stack, so the next group
+   pushes the previous one out as you scroll — exactly the desired fix. */
+.gm-group-row > td {
+  position: sticky;
+  top: var(--gm-thead-h, 64px);
+  z-index: 5;
+}
+
+/* On very small screens, let the role pill wrap and keep the grant cell
+   tap targets comfortable. */
+@media (max-width: 412px) {
+  .gm-scroll table {
+    font-size: var(--gm-font-sm, 10px);
+  }
+}
+
+/* ≤768px — hide the per-column "Grant all / locked" convenience control so
+   role columns stay narrow on mobile. Individual cells remain tappable. */
+@media (max-width: 768px) {
+  .gm-role-extra {
+    display: none !important;
+  }
+}
+
+/* ── Dashboard keyframes ──────────────────────────────────────────────────
+   Used via Tailwind arbitrary animation utilities, e.g.
+   `animate-[pulse-green_2s_infinite]` and `animate-[bar-fill_0.8s_...]`. */
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.35); }
+  50%      { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+}
+
+@keyframes bar-fill {
+  from { width: 0; }
+}
+
+/* ── Dark mode for Tailwind-based surfaces ────────────────────────────────
+   The pages converted to Tailwind use utility classes instead of inline
+   styles, so the inline `style*="color:#..."` selectors above no longer reach
+   them. Map the common light surface / text / border utilities to dark
+   equivalents under html.dark so those pages render correctly in dark mode. */
+html.dark .bg-white { background-color: #0f172a !important; }
+html.dark .bg-gray-50,
+html.dark .bg-slate-50 { background-color: #0b1220 !important; }
+html.dark .bg-gray-100,
+html.dark .bg-slate-100 { background-color: #111827 !important; }
+html.dark .text-gray-900,
+html.dark .text-slate-900,
+html.dark .text-gray-800 { color: #f1f5f9 !important; }
+html.dark .text-gray-700,
+html.dark .text-slate-700,
+html.dark .text-gray-600,
+html.dark .text-slate-600 { color: #cbd5e1 !important; }
+html.dark .text-gray-500,
+html.dark .text-slate-500 { color: #94a3b8 !important; }
+html.dark .border-gray-200,
+html.dark .border-slate-200,
+html.dark .border-gray-100 { border-color: #1e293b !important; }
