@@ -22,7 +22,7 @@ export default function DashboardPage() {
   const [targetOrgId, setTargetOrgId] = useState<string | null>(null)
   const [analytics, setAnalytics] = useState<any>(null)
 
-  const { tree } = useTree()
+  const { tree, error: treeError, reloadTree } = useTree()
   const params = useSearchParams()
   const router = useRouter()
   const orgId = params.get("org")
@@ -142,18 +142,31 @@ export default function DashboardPage() {
 
   if (!tree || !role) return (
     <div className="flex h-full items-center justify-center bg-slate-50">
-      <div className="flex items-center gap-2">
-        {[0, 1, 2].map(i => (
-          <div
-            key={i}
-            className="h-[9px] w-[9px] rounded-full animate-bounce"
-            style={{
-              backgroundColor: `hsl(${160 + i * 20}, 70%, 45%)`,
-              animationDelay: `${i * 0.18}s`,
-            }}
-          />
-        ))}
-      </div>
+      {treeError ? (
+        <div className="flex flex-col items-center gap-3 text-center">
+          <p className="text-sm font-semibold text-slate-700">Couldn’t load the organization tree</p>
+          <p className="text-xs text-slate-400">{treeError}</p>
+          <button
+            onClick={() => reloadTree()}
+            className="rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-bold text-white cursor-pointer hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          {[0, 1, 2].map(i => (
+            <div
+              key={i}
+              className="h-[9px] w-[9px] rounded-full animate-bounce"
+              style={{
+                backgroundColor: `hsl(${160 + i * 20}, 70%, 45%)`,
+                animationDelay: `${i * 0.18}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 

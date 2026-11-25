@@ -81,7 +81,17 @@ export async function GET() {
     }
   }
 
-  const tree = addCounts(root)
+  const tree = root
+    ? addCounts(root)
+    : {
+        id: user.orgUnit.id,
+        name: user.orgUnit.name,
+        type: user.orgUnit.type,
+        code: user.orgUnit.code,
+        placement: user.orgUnit.placement,
+        children: [],
+        totalAssets: 0,
+      }
 
   try {
     await redis.set(cacheKey, JSON.stringify(tree), "EX", 30)

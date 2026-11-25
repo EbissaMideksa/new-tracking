@@ -29,6 +29,18 @@ function monthLabel(key: string): string {
   return `${MONTH_NAMES[Number(m) - 1]}-${year}`
 }
 
+// Bucket a list of dates into "YYYY-MM" → count (SQLite has no date_trunc).
+function bucketByMonth(dates: Date[]): { month: string; count: number }[] {
+  const m = new Map<string, number>()
+  for (const d of dates) {
+    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`
+    m.set(key, (m.get(key) ?? 0) + 1)
+  }
+  return [...m.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([month, count]) => ({ month, count }))
+}
+
 export async function GET(req: Request) {
   const user = await getCurrentUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -68,16 +80,10 @@ export async function GET(req: Request) {
     prisma.user.count({ where: userWhere }),
     prisma.user.groupBy({ by: ["role"], where: userWhere, _count: { _all: true } }),
     prisma.user.count({ where: { ...userWhere, createdAt: { gte: new Date(last30) } } }),
-    // Month bucketing again needs date_trunc, so raw SQL (parameterised).
-    prisma.$queryRaw<{ month: string; count: number }[]>`
-      SELECT to_char(date_trunc('month', u."createdAt"), 'YYYY-MM') AS month,
-             COUNT(*)::int AS count
-        FROM "User" u
-        JOIN "OrgUnit" o ON o.id = u."orgUnitId"
-       WHERE left(o.path, length(${user.orgUnit.path})) = ${user.orgUnit.path}
-       GROUP BY 1
-       ORDER BY 1
-    `,
+    // Month bucketing in JS (SQLite has no date_trunc/to_char).
+    prisma.user
+      .findMany({ where: userWhere, select: { createdAt: true } })
+      .then((rows) => bucketByMonth(rows.map((r) => r.createdAt))),
   ])
 
   // ── Assets ────────────────────────────────────────────────────────────────
@@ -120,21 +126,24 @@ export async function GET(req: Request) {
     // cast and no row can make this query throw. Values in any other format
     // are excluded, which mirrors the old client-side code where an
     // unparseable string produced NaN and failed every comparison anyway.
-    prisma.$queryRaw<{ expiring: number; expired: number }[]>`
-      SELECT
-        COUNT(*) FILTER (
-          WHERE a."warrantyExpiration" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
-            AND left(a."warrantyExpiration", 10) >= to_char(CURRENT_DATE, 'YYYY-MM-DD')
-            AND left(a."warrantyExpiration", 10) <= to_char(CURRENT_DATE + 30, 'YYYY-MM-DD')
-        )::int AS expiring,
-        COUNT(*) FILTER (
-          WHERE a."warrantyExpiration" ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
-            AND left(a."warrantyExpiration", 10) < to_char(CURRENT_DATE, 'YYYY-MM-DD')
-        )::int AS expired
-        FROM "Asset" a
-        JOIN "OrgUnit" o ON o.id = a."orgUnitId"
-       WHERE left(o.path, length(${scopePath})) = ${scopePath}
-    `,
+    // Warranty KPIs computed in JS over ISO-shaped (YYYY-MM-DD) values.
+    prisma.asset
+      .findMany({ where: assetWhere, select: { warrantyExpiration: true } })
+      .then((rows) => {
+        const iso = /^\d{4}-\d{2}-\d{2}/
+        const today = new Date()
+        const in30 = new Date(Date.now() + 30 * DAY_MS)
+        let expiring = 0
+        let expired = 0
+        for (const r of rows) {
+          const w = r.warrantyExpiration
+          if (!w || !iso.test(w)) continue
+          const d = new Date(w.slice(0, 10))
+          if (d >= today && d <= in30) expiring++
+          else if (d < today) expired++
+        }
+        return [{ expiring, expired }]
+      }),
 
     prisma.asset.groupBy({ by: ["category"],    where: assetWhere, _count: { _all: true } }),
     prisma.asset.groupBy({ by: ["criticality"], where: assetWhere, _count: { _all: true } }),
@@ -144,15 +153,10 @@ export async function GET(req: Request) {
     // Month bucketing can't be expressed with Prisma's groupBy, so this one
     // aggregate stays in SQL. `$queryRaw` with template parameters is
     // parameterised (no string interpolation) so it is injection-safe.
-    prisma.$queryRaw<{ month: string; count: number }[]>`
-      SELECT to_char(date_trunc('month', a."createdAt"), 'YYYY-MM') AS month,
-             COUNT(*)::int AS count
-        FROM "Asset" a
-        JOIN "OrgUnit" o ON o.id = a."orgUnitId"
-       WHERE left(o.path, length(${scopePath})) = ${scopePath}
-       GROUP BY 1
-       ORDER BY 1
-    `,
+    // Month bucketing in JS (SQLite has no date_trunc/to_char).
+    prisma.asset
+      .findMany({ where: assetWhere, select: { createdAt: true } })
+      .then((rows) => bucketByMonth(rows.map((r) => r.createdAt))),
   ])
 
   const assetsByType = byTypeRows
@@ -204,14 +208,25 @@ export async function GET(req: Request) {
     // MTTR = completed − started (falling back to createdAt), averaged over
     // COMPLETED rows where that delta is positive — exactly the rows the old
     // loop accumulated. EXTRACT + AVG runs in SQL; float8 arrives as a number.
-    prisma.$queryRaw<{ mttr: number | null }[]>`
-      SELECT AVG(EXTRACT(EPOCH FROM (w."completedAt" - COALESCE(w."startedAt", w."createdAt"))) * 1000)::double precision AS mttr
-        FROM "WorkOrder" w
-        JOIN "OrgUnit" o ON o.id = w."orgUnitId"
-       WHERE left(o.path, length(${scopePath})) = ${scopePath}
-         AND w."status" = 'COMPLETED'
-         AND w."completedAt" > COALESCE(w."startedAt", w."createdAt")
-    `,
+// MTTR = avg(completed − started, fallback createdAt) over COMPLETED rows,
+    // computed in JS (SQLite has no EXTRACT(EPOCH …)).
+    prisma.workOrder
+      .findMany({
+        where: { ...woWhere, status: "COMPLETED" },
+        select: { startedAt: true, completedAt: true, createdAt: true },
+      })
+      .then((rows) => {
+        let sum = 0
+        let n = 0
+        for (const w of rows) {
+          const start = w.startedAt ?? w.createdAt
+          if (w.completedAt && w.completedAt > start) {
+            sum += w.completedAt.getTime() - start.getTime()
+            n++
+          }
+        }
+        return [{ mttr: n ? sum / n : null }]
+      }),
   ])
 
   // ── User metrics ──────────────────────────────────────────────────────────
