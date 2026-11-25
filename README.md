@@ -2,9 +2,9 @@
 
 A full-stack asset-tracking application built with Next.js (App Router), Prisma
 and SQLite. It is a self-contained copy of the previously developed tracking
-system, stripped of external infrastructure (no Redis, S3/MinIO, Prometheus or
-Docker) so it runs with **zero external services** — just Node.js and a local
-SQLite file.
+system, stripped of external infrastructure (no Redis, S3/MinIO or Prometheus)
+so it runs with **zero external services** — just Node.js and a local SQLite
+file. Docker is used only to package/deploy it (Dokploy).
 
 ## Features
 
@@ -62,6 +62,38 @@ npm run start
 
 Change `DEFAULT_USER_PASSWORD` / `SEED_ADMIN_PASSWORD` before seeding for
 anything beyond local use.
+
+## Deployment (Dokploy)
+
+The GitHub workflows have been removed — Dokploy handles build & deploy.
+
+**Option A — Dockerfile source (recommended):** create a Dokploy service with
+source **Dockerfile** pointing at this repo. Dokploy builds the `Dockerfile`,
+publishes container port `3000`, and routes the host port you assign
+(`3080`) to it. Set the environment variables below in the Dokploy service.
+
+**Option B — Compose source:** use Dokploy's **Compose** editor with the
+included `docker-compose.yml` (it maps `3080:3000`, declares the `asset_data`
+volume, and reads env from `.env.production` via `env_file`).
+
+Environment (Dokploy → Environment, or `.env.production`):
+
+```env
+NODE_ENV=production
+PORT=3000
+DATABASE_URL=file:/app/data/dev.db
+JWT_SECRET=<min 32 chars>
+LOG_LEVEL=info
+PHOTO_STORAGE=local
+SEED_ON_START=1
+```
+
+Persistent volume: mount a volume at `/app/data` so the SQLite DB survives
+re-deploys (the Compose file declares `asset_data`). The container runs
+`prisma db push` on start, then optionally seeds when `SEED_ON_START=1`.
+
+After first boot the app is reachable at **http://10.117.66.20:3080**
+(host `3080` → container `3000`). Default login: `super@track.com` / `Test@123`.
 
 ## Notes
 

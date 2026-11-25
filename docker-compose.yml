@@ -1,0 +1,19 @@
+# Compose file for Dokploy's "Compose" source (or local `docker compose up`).
+# The app is published on host port 3080 -> container 3000, i.e.
+# http://10.117.66.20:3080 once Dokploy assigns/routes the port.
+
+services:
+  app:
+    build: .
+    image: asset_tracking:latest
+    container_name: asset_tracking
+    restart: unless-stopped
+    ports:
+      - "3080:3000"
+    env_file:
+      - .env.production
+    volumes:
+      - asset_data:/app/data
+
+volumes:
+  asset_data:

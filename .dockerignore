@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+dev.db
+prisma/*.db
+public/uploads
+.env
+.env.*
+!.env.example
+npm-debug.log*
+Dockerfile
+docker-compose*.yml
+docs
+scripts
+*.md
