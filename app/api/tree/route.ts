@@ -47,10 +47,6 @@ export async function GET() {
       by: ["orgUnitId"],
       _count: { _all: true },
       where: { orgUnit: { path: { startsWith: user.orgUnit.path } } },
-      select: {
-        orgUnitId: true,
-        _count: true,
-      },
     }),
   ])
 
