@@ -22,7 +22,12 @@ function alive(key: string): Entry | undefined {
 
 let client: Redis | null = null
 if (process.env.REDIS_URL) {
-  client = new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: null })
+  client = new Redis(process.env.REDIS_URL, {
+    lazyConnect: true,
+    connectTimeout: 5000,
+    maxRetriesPerRequest: 2,
+    retryStrategy: (times) => (times > 3 ? null : Math.min(times * 200, 3000)),
+  })
   client.on("error", () => {})
 }
 

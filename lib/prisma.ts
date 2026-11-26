@@ -13,8 +13,11 @@ function makeClient(): PrismaClient {
   const connectionString =
     process.env.DATABASE_URL ??
     "postgresql://asset:asset@localhost:5432/asset_tracking"
+  const pgConnectionString = connectionString.includes("?")
+    ? `${connectionString}&connect_timeout=5`
+    : `${connectionString}?connect_timeout=5`
   return new PrismaClient({
-    adapter: new PrismaPg({ connectionString }),
+    adapter: new PrismaPg({ connectionString: pgConnectionString }),
     log: [
       { emit: "stdout", level: "warn" },
       { emit: "stdout", level: "error" },
