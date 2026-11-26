@@ -20,18 +20,17 @@ RUN npm ci
 
 # ── builder ──────────────────────────────────────────────────────────────────
 FROM base AS builder
-# prisma.config.ts resolves DATABASE_URL at generate/build time; provide a build
-# placeholder (the real DB is created at runtime on the volume).
-ENV DATABASE_URL=file:/app/data/dev.db
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN mkdir -p /app/data && npx prisma generate && npm run build
+# DATABASE_URL is only needed so prisma.config.ts can load during generate/build;
+# it is a throwaway placeholder (the real value comes from .env at runtime).
+RUN DATABASE_URL=postgresql://build:build@localhost:5432/build npx prisma generate \
+  && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build
 
 # ── runner ───────────────────────────────────────────────────────────────────
 FROM base AS runner
 ENV NODE_ENV=production \
-    PORT=3000 \
-    DATABASE_URL=file:/app/data/dev.db
+    PORT=3000
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
@@ -44,6 +43,6 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/app/generated ./app/generated
 COPY --from=builder /app/lib ./lib
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh && mkdir -p /app/data
+RUN chmod +x ./docker-entrypoint.sh
 EXPOSE 3000
 ENTRYPOINT ["./docker-entrypoint.sh"]

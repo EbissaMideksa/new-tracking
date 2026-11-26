@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
-# Apply the Prisma schema to the SQLite database on every start (idempotent).
-# The DB lives on a persistent volume at /app/data (see docker-compose.yml).
-mkdir -p /app/data
+# Apply the Prisma schema to the PostgreSQL database on every start
+# (idempotent). The DB is the `db` service defined in docker-compose.yml and is
+# already healthy before this container starts (depends_on: service_healthy).
 echo "[entrypoint] syncing database schema..."
 npx prisma db push
 

@@ -1,20 +1,20 @@
 // lib/prisma.ts
 //
-// SQLite (libSQL) edition. A single file-backed database (./dev.db by default)
-// is used for both the Prisma CLI (schema push) and the runtime client, so no
-// external database server is required. A relative `file:` URL is resolved
-// against the current working directory by libSQL, matching the CLI.
+// PostgreSQL edition. Prisma 7 requires a driver adapter; we use the native
+// `pg` adapter. The connection string comes from DATABASE_URL.
 import { PrismaClient } from "../app/generated/prisma/client"
-import { PrismaLibSql } from "@prisma/adapter-libsql"
+import { PrismaPg } from "@prisma/adapter-pg"
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient
 }
 
 function makeClient(): PrismaClient {
-  const url = process.env.DATABASE_URL ?? "file:./dev.db"
+  const connectionString =
+    process.env.DATABASE_URL ??
+    "postgresql://asset:asset@localhost:5432/asset_tracking"
   return new PrismaClient({
-    adapter: new PrismaLibSql({ url }),
+    adapter: new PrismaPg({ connectionString }),
     log: [
       { emit: "stdout", level: "warn" },
       { emit: "stdout", level: "error" },

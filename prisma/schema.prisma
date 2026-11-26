@@ -1,6 +1,6 @@
-// SQLite edition — enums are modelled as String columns (SQLite has no enums),
-// JSON payloads are stored as String (SQLite has no Json type) and decimals as
-// Float. The canonical enum values live in lib/enums.ts.
+// PostgreSQL edition. Enum-like columns are stored as String and JSON payloads
+// as String (portable across providers); decimals use Float. The canonical enum
+// values live in lib/enums.ts.
 
 generator client {
   provider = "prisma-client"
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model OrgUnit {

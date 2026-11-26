@@ -1,8 +1,56 @@
-# Compose file for Dokploy's "Compose" source (or local `docker compose up`).
-# The app is published on host port 3080 -> container 3000, i.e.
-# http://10.117.66.20:3080 once Dokploy assigns/routes the port.
+# Multi-container stack for Dokploy's "Compose" source (or local
+# `docker compose up`). The app is published on host port 3080 -> container
+# 3000, i.e. http://10.117.66.20:3080 once Dokploy routes the port.
+#
+# Services: db (PostgreSQL 17), redis, pgAdmin (DB UI on :5050), app.
 
 services:
+  db:
+    image: postgres:17-alpine
+    container_name: asset_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: asset
+      POSTGRES_PASSWORD: asset
+      POSTGRES_DB: asset_tracking
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asset -d asset_tracking"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    container_name: asset_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: asset_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@asset.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
   app:
     build: .
     image: asset_tracking:latest
@@ -12,8 +60,15 @@ services:
       - "3080:3000"
     env_file:
       - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
-      - asset_data:/app/data
+      - app_uploads:/app/public/uploads
 
 volumes:
-  asset_data:
+  pgdata:
+  redisdata:
+  app_uploads:
