@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: asset
       POSTGRES_DB: asset_tracking
     ports:
-      - "5432:5432"
+      - "5433:5433"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
