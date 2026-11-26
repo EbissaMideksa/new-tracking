@@ -33,11 +33,24 @@ export async function GET() {
   const [orgs, assetCounts] = await Promise.all([
     prisma.orgUnit.findMany({
       where: { path: { startsWith: user.orgUnit.path } },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        parentId: true,
+        path: true,
+        code: true,
+        placement: true,
+      },
     }),
     prisma.asset.groupBy({
       by: ["orgUnitId"],
       _count: { _all: true },
       where: { orgUnit: { path: { startsWith: user.orgUnit.path } } },
+      select: {
+        orgUnitId: true,
+        _count: true,
+      },
     }),
   ])
 

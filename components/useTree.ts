@@ -11,9 +11,9 @@ export function useTree() {
   const loadTree = useCallback(async () => {
     setError(null)
     const ctrl = new AbortController()
-    // Never spin forever: if /api/tree hangs (slow proxy, dropped connection),
-    // surface a timeout instead of an endless loader.
-    const timer = setTimeout(() => ctrl.abort(), 12_000)
+    // Increased timeout from 12s to 30s to accommodate larger org datasets
+    // and slower database connections (e.g., Docker Compose deployments)
+    const timer = setTimeout(() => ctrl.abort(), 30_000)
     try {
       const res = await fetch("/api/tree", { credentials: "include", signal: ctrl.signal })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
